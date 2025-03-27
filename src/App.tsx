@@ -9,6 +9,7 @@ import CustomersPage from "./pages/CustomersPage";
 import LeadsPage from "./pages/LeadsPage";
 import InteractionsPage from "./pages/InteractionsPage";
 import MessagesPage from "./pages/MessagesPage";
+import ChatbotPage from "./pages/ChatbotPage";
 import NotFound from "./pages/NotFound";
 import { useState } from "react";
 
@@ -28,6 +29,7 @@ const App = () => {
             <Route path="/leads" element={<LeadsPage />} />
             <Route path="/interactions" element={<InteractionsPage />} />
             <Route path="/messages" element={<MessagesPage />} />
+            <Route path="/chatbot" element={<ChatbotPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

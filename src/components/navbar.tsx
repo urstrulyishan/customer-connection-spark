@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, Clock, MessageSquare, Menu, X } from "lucide-react";
+import { BarChart3, Users, Clock, MessageSquare, Menu, X, Bot } from "lucide-react";
 
 const navItems = [
   {
@@ -29,6 +28,11 @@ const navItems = [
     name: "Messages",
     path: "/messages",
     icon: MessageSquare,
+  },
+  {
+    name: "Chatbot",
+    path: "/chatbot",
+    icon: Bot,
   },
 ];
 
