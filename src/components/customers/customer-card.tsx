@@ -20,15 +20,17 @@ export interface CustomerData {
 interface CustomerCardProps {
   customer: CustomerData;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function CustomerCard({ customer, className }: CustomerCardProps) {
+export function CustomerCard({ customer, className, style }: CustomerCardProps) {
   return (
     <div 
       className={cn(
         "group rounded-xl border bg-card p-5 shadow-card transition-all hover:shadow-lg hover:-translate-y-0.5",
         className
       )}
+      style={style}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
