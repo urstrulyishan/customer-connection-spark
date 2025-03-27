@@ -38,8 +38,8 @@ const conversations: ConversationData[] = [
   {
     id: "1",
     customer: {
-      name: "Emma Thompson",
-      initials: "ET",
+      name: "Arjun Patel",
+      initials: "AP",
     },
     lastMessage: "Thanks for the quick response!",
     lastMessageTime: "10:30 AM",
@@ -49,14 +49,14 @@ const conversations: ConversationData[] = [
         id: "1-1",
         sender: "me",
         time: "10:15 AM",
-        content: "Hello Emma, how can I help you today?"
+        content: "Hello Arjun, how can I help you today?"
       },
       {
         id: "1-2",
         sender: "customer",
         customer: {
-          name: "Emma Thompson",
-          initials: "ET",
+          name: "Arjun Patel",
+          initials: "AP",
         },
         time: "10:20 AM",
         content: "Hi, I'm having trouble with the new dashboard feature. Can you help me set it up?"
@@ -71,8 +71,8 @@ const conversations: ConversationData[] = [
         id: "1-4",
         sender: "customer",
         customer: {
-          name: "Emma Thompson",
-          initials: "ET",
+          name: "Arjun Patel",
+          initials: "AP",
         },
         time: "10:30 AM",
         content: "Thanks for the quick response!"
@@ -82,8 +82,8 @@ const conversations: ConversationData[] = [
   {
     id: "2",
     customer: {
-      name: "Michael Chen",
-      initials: "MC",
+      name: "Ananya Gupta",
+      initials: "AG",
     },
     lastMessage: "I'll review the proposal and get back to you tomorrow.",
     lastMessageTime: "Yesterday",
@@ -93,14 +93,14 @@ const conversations: ConversationData[] = [
         id: "2-1",
         sender: "me",
         time: "Yesterday, 2:15 PM",
-        content: "Hello Michael, I've sent you the proposal we discussed during our meeting."
+        content: "Hello Ananya, I've sent you the proposal we discussed during our meeting."
       },
       {
         id: "2-2",
         sender: "customer",
         customer: {
-          name: "Michael Chen",
-          initials: "MC",
+          name: "Ananya Gupta",
+          initials: "AG",
         },
         time: "Yesterday, 3:20 PM",
         content: "I'll review the proposal and get back to you tomorrow."
@@ -110,8 +110,8 @@ const conversations: ConversationData[] = [
   {
     id: "3",
     customer: {
-      name: "Sarah Williams",
-      initials: "SW",
+      name: "Neha Kapoor",
+      initials: "NK",
     },
     lastMessage: "The new features look amazing! Our team is excited to start using them.",
     lastMessageTime: "May 15",
@@ -121,14 +121,14 @@ const conversations: ConversationData[] = [
         id: "3-1",
         sender: "me",
         time: "May 15, 11:30 AM",
-        content: "Hi Sarah, following up on our meeting yesterday. I wanted to make sure you had access to all the materials we discussed."
+        content: "Hi Neha, following up on our meeting yesterday. I wanted to make sure you had access to all the materials we discussed."
       },
       {
         id: "3-2",
         sender: "customer",
         customer: {
-          name: "Sarah Williams",
-          initials: "SW",
+          name: "Neha Kapoor",
+          initials: "NK",
         },
         time: "May 15, 12:45 PM",
         content: "The new features look amazing! Our team is excited to start using them."

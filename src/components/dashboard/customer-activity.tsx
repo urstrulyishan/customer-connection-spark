@@ -20,8 +20,8 @@ const activities: ActivityItem[] = [
     id: "1",
     type: "message",
     customer: {
-      name: "Emma Thompson",
-      initials: "ET",
+      name: "Ravi Verma",
+      initials: "RV",
     },
     time: "10 min ago",
     description: "Sent a follow-up email about the new proposal."
@@ -30,8 +30,8 @@ const activities: ActivityItem[] = [
     id: "2",
     type: "task",
     customer: {
-      name: "Michael Chen",
-      initials: "MC",
+      name: "Ananya Gupta",
+      initials: "AG",
     },
     time: "1 hour ago",
     description: "Completed onboarding for premium plan."
@@ -40,8 +40,8 @@ const activities: ActivityItem[] = [
     id: "3",
     type: "meeting",
     customer: {
-      name: "Sarah Williams",
-      initials: "SW",
+      name: "Neha Kapoor",
+      initials: "NK",
     },
     time: "2 hours ago",
     description: "Scheduled a product demo for next Tuesday."
@@ -50,8 +50,8 @@ const activities: ActivityItem[] = [
     id: "4",
     type: "message",
     customer: {
-      name: "David Rodriguez",
-      initials: "DR",
+      name: "Rajesh Kumar",
+      initials: "RK",
     },
     time: "Yesterday",
     description: "Requested more information about pricing."

@@ -10,33 +10,33 @@ import { Users, DollarSign, Clock, BarChart } from "lucide-react";
 const recentCustomers: CustomerData[] = [
   {
     id: "1",
-    name: "Emma Thompson",
-    email: "emma@example.com",
+    name: "Arjun Patel",
+    email: "arjun@example.com",
     phone: "(555) 123-4567",
     company: "Acme Inc.",
     status: "active",
     lastContact: "Today",
-    initials: "ET"
+    initials: "AP"
   },
   {
     id: "2",
-    name: "Michael Chen",
-    email: "michael@example.com",
+    name: "Priya Singh",
+    email: "priya@example.com",
     phone: "(555) 234-5678",
     company: "GlobalTech",
     status: "new",
     lastContact: "Yesterday",
-    initials: "MC"
+    initials: "PS"
   },
   {
     id: "3",
-    name: "Sarah Williams",
-    email: "sarah@example.com",
+    name: "Vikram Sharma",
+    email: "vikram@example.com",
     phone: "(555) 345-6789",
     company: "Innovate LLC",
     status: "active",
     lastContact: "3 days ago",
-    initials: "SW"
+    initials: "VS"
   }
 ];
 

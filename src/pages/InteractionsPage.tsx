@@ -30,77 +30,77 @@ const interactions: InteractionData[] = [
     id: "1",
     type: "call",
     customer: {
-      name: "Emma Thompson",
-      initials: "ET"
+      name: "Arjun Patel",
+      initials: "AP"
     },
     date: "Today",
     time: "10:30 AM",
     duration: "15 min",
     summary: "Discussed new feature requirements",
-    notes: "Emma was interested in the new analytics dashboard. Follow up next week with a demo."
+    notes: "Arjun was interested in the new analytics dashboard. Follow up next week with a demo."
   },
   {
     id: "2",
     type: "email",
     customer: {
-      name: "Michael Chen",
-      initials: "MC"
+      name: "Ananya Gupta",
+      initials: "AG"
     },
     date: "Yesterday",
     time: "2:45 PM",
     summary: "Sent onboarding materials",
-    notes: "Michael requested additional documentation about the API integration."
+    notes: "Ananya requested additional documentation about the API integration."
   },
   {
     id: "3",
     type: "meeting",
     customer: {
-      name: "Sarah Williams",
-      initials: "SW"
+      name: "Neha Kapoor",
+      initials: "NK"
     },
     date: "May 15, 2023",
     time: "11:00 AM",
     duration: "45 min",
     summary: "Product demo and Q&A session",
-    notes: "Sarah and her team were impressed with the new UI. They want to schedule a follow-up to discuss pricing."
+    notes: "Neha and her team were impressed with the new UI. They want to schedule a follow-up to discuss pricing."
   },
   {
     id: "4",
     type: "message",
     customer: {
-      name: "David Rodriguez",
-      initials: "DR"
+      name: "Rajesh Kumar",
+      initials: "RK"
     },
     date: "May 14, 2023",
     time: "9:15 AM",
     summary: "Quick question about billing",
-    notes: "David asked about changing his billing cycle. I directed him to the account settings page."
+    notes: "Rajesh asked about changing his billing cycle. I directed him to the account settings page."
   },
   {
     id: "5",
     type: "call",
     customer: {
-      name: "Jennifer Lee",
-      initials: "JL"
+      name: "Anjali Mehta",
+      initials: "AM"
     },
     date: "May 12, 2023",
     time: "3:30 PM",
     duration: "10 min",
     summary: "Follow-up on support ticket",
-    notes: "Jennifer confirmed that the issue was resolved. She's satisfied with the support response time."
+    notes: "Anjali confirmed that the issue was resolved. She's satisfied with the support response time."
   },
   {
     id: "6",
     type: "meeting",
     customer: {
-      name: "Robert Kim",
-      initials: "RK"
+      name: "Rahul Joshi",
+      initials: "RJ"
     },
     date: "May 10, 2023",
     time: "1:00 PM",
     duration: "30 min",
     summary: "Quarterly review meeting",
-    notes: "Robert mentioned that his team is growing and they might need to upgrade their subscription soon."
+    notes: "Rahul mentioned that his team is growing and they might need to upgrade their subscription soon."
   }
 ];
 

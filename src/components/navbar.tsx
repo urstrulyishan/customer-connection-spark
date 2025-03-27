@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -71,7 +72,7 @@ export function Navbar() {
           
           <div className="flex items-center">
             <button className="ml-4 rounded-full w-8 h-8 bg-accent flex items-center justify-center" aria-label="User menu">
-              <span className="text-xs font-medium">JD</span>
+              <span className="text-xs font-medium">AS</span>
             </button>
             
             <button

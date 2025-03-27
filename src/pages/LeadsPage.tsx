@@ -26,69 +26,69 @@ interface LeadData {
 const leads: LeadData[] = [
   {
     id: "1",
-    name: "Thomas Anderson",
-    email: "thomas@matrix.com",
+    name: "Siddharth Malhotra",
+    email: "siddharth@matrix.com",
     company: "Matrix Corp",
     status: "new",
     score: "hot",
     source: "Website",
     date: "Today",
-    initials: "TA"
+    initials: "SM"
   },
   {
     id: "2",
-    name: "Lisa Johnson",
-    email: "lisa@enterprise.com",
+    name: "Kavita Bajaj",
+    email: "kavita@enterprise.com",
     company: "Enterprise Solutions",
     status: "contacted",
     score: "warm",
     source: "Referral",
     date: "Yesterday",
-    initials: "LJ"
+    initials: "KB"
   },
   {
     id: "3",
-    name: "Mark Wilson",
-    email: "mark@innovative.com",
+    name: "Mohan Desai",
+    email: "mohan@innovative.com",
     company: "Innovative Tech",
     status: "qualified",
     score: "hot",
     source: "LinkedIn",
     date: "2 days ago",
-    initials: "MW"
+    initials: "MD"
   },
   {
     id: "4",
-    name: "Sophia Garcia",
-    email: "sophia@futuretech.com",
+    name: "Sunita Agarwal",
+    email: "sunita@futuretech.com",
     company: "Future Technologies",
     status: "proposal",
     score: "hot",
     source: "Conference",
     date: "3 days ago",
-    initials: "SG"
+    initials: "SA"
   },
   {
     id: "5",
-    name: "James Smith",
-    email: "james@digitalex.com",
+    name: "Jayant Narayan",
+    email: "jayant@digitalex.com",
     company: "Digital Express",
     status: "new",
     score: "cold",
     source: "Email Campaign",
     date: "1 week ago",
-    initials: "JS"
+    initials: "JN"
   },
   {
     id: "6",
-    name: "Olivia Brown",
-    email: "olivia@techwave.com",
+    name: "Pooja Bhatia",
+    email: "pooja@techwave.com",
     company: "TechWave Inc.",
     status: "contacted",
     score: "warm",
     source: "Advertisement",
     date: "5 days ago",
-    initials: "OB"
+    initials: "PB"
   }
 ];
 

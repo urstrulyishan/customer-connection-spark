@@ -11,38 +11,38 @@ import { useState } from "react";
 const customers: CustomerData[] = [
   {
     id: "1",
-    name: "Emma Thompson",
-    email: "emma@example.com",
+    name: "Arjun Patel",
+    email: "arjun@example.com",
     phone: "(555) 123-4567",
     company: "Acme Inc.",
     status: "active",
     lastContact: "Today",
-    initials: "ET"
+    initials: "AP"
   },
   {
     id: "2",
-    name: "Michael Chen",
-    email: "michael@example.com",
+    name: "Priya Singh",
+    email: "priya@example.com",
     phone: "(555) 234-5678",
     company: "GlobalTech",
     status: "new",
     lastContact: "Yesterday",
-    initials: "MC"
+    initials: "PS"
   },
   {
     id: "3",
-    name: "Sarah Williams",
-    email: "sarah@example.com",
+    name: "Vikram Sharma",
+    email: "vikram@example.com",
     phone: "(555) 345-6789",
     company: "Innovate LLC",
     status: "active",
     lastContact: "3 days ago",
-    initials: "SW"
+    initials: "VS"
   },
   {
     id: "4",
-    name: "David Rodriguez",
-    email: "david@example.com",
+    name: "Deepak Reddy",
+    email: "deepak@example.com",
     phone: "(555) 456-7890",
     company: "Tech Solutions",
     status: "inactive",
@@ -51,23 +51,23 @@ const customers: CustomerData[] = [
   },
   {
     id: "5",
-    name: "Jennifer Lee",
-    email: "jennifer@example.com",
+    name: "Anjali Mehta",
+    email: "anjali@example.com",
     phone: "(555) 567-8901",
     company: "Design Studio",
     status: "active",
     lastContact: "2 days ago",
-    initials: "JL"
+    initials: "AM"
   },
   {
     id: "6",
-    name: "Robert Kim",
-    email: "robert@example.com",
+    name: "Rahul Joshi",
+    email: "rahul@example.com",
     phone: "(555) 678-9012",
     company: "Marketing Pros",
     status: "new",
     lastContact: "Today",
-    initials: "RK"
+    initials: "RJ"
   }
 ];
 
