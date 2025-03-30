@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
-import { Building, Mail, Phone, User } from "lucide-react";
+import { Building, Mail, Phone, User, Users } from "lucide-react";
 
-import { PageContainer, SectionContainer } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,15 +41,24 @@ export default function CompanyRegistration() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, we would send this data to a server
-    console.log(values);
-    
-    // Store company data in localStorage for now
+    // Check if email already exists
     const companies = JSON.parse(localStorage.getItem("companies") || "[]");
+    const existingCompany = companies.find(
+      (company: any) => company.email.toLowerCase() === values.email.toLowerCase()
+    );
+    
+    if (existingCompany) {
+      toast.error("A company with this email already exists. Please log in instead.");
+      return;
+    }
+    
+    // Create new company
     const newCompany = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       ...values,
       registrationDate: new Date().toISOString(),
+      platformConnections: [],
+      lastSync: null,
     };
     
     companies.push(newCompany);
@@ -159,7 +167,12 @@ export default function CompanyRegistration() {
                   <FormItem>
                     <FormLabel>Number of Employees</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="10" min="1" {...field} />
+                      <div className="flex">
+                        <div className="bg-primary/10 flex items-center justify-center w-10 rounded-l-md border border-r-0 border-input">
+                          <Users className="h-4 w-4 text-primary" />
+                        </div>
+                        <Input type="number" className="rounded-l-none" placeholder="10" min="1" {...field} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
