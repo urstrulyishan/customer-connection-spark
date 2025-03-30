@@ -1,22 +1,23 @@
 
 import { useState, useEffect } from "react";
-import { LeadData, LeadInsights } from "@/types/leads";
+import { type LeadData, type LeadInsights as LeadInsightsType } from "@/types/leads";
 import { getLeadsInsights } from "@/utils/aiAnalysisUtils";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { Brain, Calendar, ChevronRight, Mail, PieChart as PieChartIcon } from "lucide-react";
+import { ChartContainer } from "@/components/ui/chart";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import { Brain, Calendar, ChevronRight, PieChart as PieChartIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Tooltip as ReactTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LeadInsightsProps {
   leads: LeadData[];
 }
 
 export function LeadInsights({ leads }: LeadInsightsProps) {
-  const [insights, setInsights] = useState<LeadInsights | null>(null);
+  const [insights, setInsights] = useState<LeadInsightsType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,6 +65,17 @@ export function LeadInsights({ leads }: LeadInsightsProps) {
   const COLORS = ["#3b82f6", "#f97316", "#ef4444"];
   const sourceData = Object.entries(insights.sourceDistribution).map(([name, value]) => ({ name, value }));
   const scoreData = Object.entries(insights.scoreDistribution).map(([name, value]) => ({ name, value }));
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover border rounded p-2 shadow-md text-xs">
+          <p>{`${payload[0].name}: ${payload[0].value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card>
@@ -119,9 +131,7 @@ export function LeadInsights({ leads }: LeadInsightsProps) {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ChartContainer>
             </div>
