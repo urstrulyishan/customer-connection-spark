@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PageContainer, SectionContainer } from "@/components/ui/container";
 import { MainLayout } from "@/layouts/main-layout";
@@ -38,7 +37,7 @@ const connectionFormSchema = z.object({
 
 export default function PlatformConnectionsPage() {
   const { toast } = useToast();
-  const { currentCompany } = useCompany();
+  const { currentCompany, refreshConnectionStatus } = useCompany();
   const [connections, setConnections] = useState<PlatformConnection[]>([]);
   const [editingConnection, setEditingConnection] = useState<PlatformConnection | null>(null);
   const [isSyncing, setIsSyncing] = useState<string | null>(null);
@@ -65,6 +64,7 @@ export default function PlatformConnectionsPage() {
   const saveConnections = (updatedConnections: PlatformConnection[]) => {
     saveCompanyData("platformConnections", updatedConnections);
     setConnections(updatedConnections);
+    refreshConnectionStatus();
   };
 
   // Handle form submission for adding/editing connections
@@ -82,10 +82,14 @@ export default function PlatformConnectionsPage() {
         description: `${data.name} connection has been updated.`,
       });
     } else {
-      // Add new connection
+      // Add new connection - Make sure all required properties are set
       const newConnection: PlatformConnection = {
         id: crypto.randomUUID(),
-        ...data,
+        name: data.name,
+        type: data.type,
+        url: data.url,
+        apiKey: data.apiKey,
+        isActive: data.isActive,
       };
       saveConnections([...connections, newConnection]);
       toast({
@@ -130,7 +134,7 @@ export default function PlatformConnectionsPage() {
     });
   };
 
-  // Toggle connection active status
+  // Toggle connection status
   const toggleConnectionStatus = (id: string) => {
     const updatedConnections = connections.map(conn => 
       conn.id === id ? { ...conn, isActive: !conn.isActive } : conn
@@ -188,7 +192,10 @@ export default function PlatformConnectionsPage() {
                   <p className="text-muted-foreground mb-4">
                     You haven't added any platform connections yet.
                   </p>
-                  <Button onClick={() => document.querySelector('[data-value="add"]')?.click()}>
+                  <Button onClick={() => {
+                    const addTab = document.querySelector('[data-value="add"]') as HTMLElement;
+                    if (addTab) addTab.click();
+                  }}>
                     Add Your First Connection
                   </Button>
                 </div>
