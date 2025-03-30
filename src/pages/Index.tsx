@@ -5,12 +5,15 @@ import { MainLayout } from "@/layouts/main-layout";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { CustomerActivity } from "@/components/dashboard/customer-activity";
 import { CustomerCard, CustomerData } from "@/components/customers/customer-card";
-import { Users, DollarSign, Clock, BarChart } from "lucide-react";
+import { Users, DollarSign, Clock, BarChart, Link2 } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { getCompanyData } from "@/utils/companyDataUtils";
 
 export default function Index() {
-  const { currentCompany } = useCompany();
+  const { currentCompany, hasActivePlatformConnections } = useCompany();
   const navigate = useNavigate();
   const [customers, setCustomers] = useState<CustomerData[]>([]);
 
@@ -82,6 +85,23 @@ export default function Index() {
             Welcome back to {currentCompany?.companyName || "your"} CRM dashboard.
           </p>
         </div>
+        
+        {!hasActivePlatformConnections && (
+          <Alert className="mb-6">
+            <Link2 className="h-4 w-4" />
+            <AlertTitle>Connect your platforms</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>Connect your existing systems to sync customer data and enhance your CRM experience.</span>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => navigate("/platform-connections")}
+              >
+                Connect Platforms
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
         
         <SectionContainer className="py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -14,6 +14,7 @@ import ChatbotPage from "./pages/ChatbotPage";
 import CompanyRegistration from "./pages/CompanyRegistration";
 import CompanyLogin from "./pages/CompanyLogin";
 import CompanyProfile from "./pages/CompanyProfile";
+import PlatformConnectionsPage from "./pages/PlatformConnectionsPage";
 import NotFound from "./pages/NotFound";
 import { CompanyProvider } from "./contexts/CompanyContext";
 
@@ -41,6 +42,7 @@ const App = () => {
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/chatbot" element={<ChatbotPage />} />
               <Route path="/company-profile" element={<CompanyProfile />} />
+              <Route path="/platform-connections" element={<PlatformConnectionsPage />} />
               
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />

@@ -13,6 +13,17 @@ export type Company = {
   registrationDate: string;
 };
 
+// Platform integration types
+export type PlatformIntegration = {
+  id: string;
+  name: string;
+  type: "api" | "webhook" | "database" | "email" | "ecommerce";
+  url: string;
+  apiKey?: string;
+  isActive: boolean;
+  lastSync?: string;
+}
+
 /**
  * Get the current company from localStorage
  */
@@ -57,4 +68,65 @@ export function getCompanyData<T>(key: string, defaultValue: T): T {
     console.error(`Error parsing ${key} data`, e);
     return defaultValue;
   }
+}
+
+/**
+ * Sync data between two platforms
+ * This is a mock implementation that simulates data syncing
+ */
+export function syncPlatformData(sourceUrl: string, destinationUrl: string, apiKey?: string): Promise<boolean> {
+  // In a real implementation, this would make API calls to external services
+  return new Promise((resolve) => {
+    console.log(`Syncing data from ${sourceUrl} to ${destinationUrl}`);
+    // Simulate API delay
+    setTimeout(() => {
+      resolve(true);
+    }, 1500);
+  });
+}
+
+/**
+ * Check if a platform connection is valid
+ * This is a mock implementation that simulates connection validation
+ */
+export function validatePlatformConnection(url: string, apiKey?: string): Promise<{isValid: boolean, message: string}> {
+  return new Promise((resolve) => {
+    console.log(`Validating connection to ${url}`);
+    // Simulate API delay
+    setTimeout(() => {
+      // Randomly succeed or fail for demo purposes
+      const isValid = Math.random() > 0.2; // 80% success rate
+      
+      if (isValid) {
+        resolve({
+          isValid: true,
+          message: "Connection successful"
+        });
+      } else {
+        resolve({
+          isValid: false,
+          message: "Could not connect to the platform. Please check your URL and API key."
+        });
+      }
+    }, 1000);
+  });
+}
+
+/**
+ * Get available data types from a platform
+ * This is a mock implementation that simulates fetching available data types
+ */
+export function getPlatformDataTypes(url: string, apiKey?: string): Promise<string[]> {
+  return new Promise((resolve) => {
+    // Simulate API delay
+    setTimeout(() => {
+      resolve([
+        "customers",
+        "leads",
+        "sales",
+        "products",
+        "interactions"
+      ]);
+    }, 800);
+  });
 }
