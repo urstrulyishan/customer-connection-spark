@@ -6,23 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Filter, Plus, Search, ThermometerSnowflake, LucideIcon, Flame, ArrowRight } from "lucide-react";
+import { Filter, Plus, Search, ThermometerSnowflake, LucideIcon, Flame, ArrowRight, Brain } from "lucide-react";
 import { useState } from "react";
+import { LeadInsights } from "@/components/leads/lead-insights";
+import { LeadData } from "@/types/leads";
 
-interface LeadData {
-  id: string;
-  name: string;
-  email: string;
-  company: string;
-  status: "new" | "contacted" | "qualified" | "proposal" | "closed";
-  score: "cold" | "warm" | "hot";
-  source: string;
-  date: string;
-  avatar?: string;
-  initials: string;
-}
-
-// Sample data
+// Sample data - This would typically come from an API or database
 const leads: LeadData[] = [
   {
     id: "1",
@@ -137,6 +126,7 @@ function getScoreColor(score: LeadData["score"]) {
 
 export default function LeadsPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showInsights, setShowInsights] = useState(true);
   
   const filteredLeads = leads.filter(lead => 
     lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -165,6 +155,15 @@ export default function LeadsPage() {
             </div>
             
             <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-9"
+                onClick={() => setShowInsights(!showInsights)}
+              >
+                <Brain className="mr-2 h-4 w-4" />
+                {showInsights ? "Hide Insights" : "Show Insights"}
+              </Button>
               <Button variant="outline" size="sm" className="h-9">
                 <Filter className="mr-2 h-4 w-4" />
                 Filter
@@ -175,6 +174,12 @@ export default function LeadsPage() {
               </Button>
             </div>
           </div>
+
+          {showInsights && (
+            <div className="mb-6">
+              <LeadInsights leads={filteredLeads} />
+            </div>
+          )}
           
           <div className="overflow-hidden rounded-xl border shadow-card">
             <table className="min-w-full divide-y divide-border">
