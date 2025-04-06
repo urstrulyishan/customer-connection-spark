@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Calendar, ArrowRight } from "lucide-react";
+import { ShoppingCart, Calendar, ArrowRight, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "@/contexts/CompanyContext";
@@ -17,6 +17,7 @@ interface Purchase {
   id: string;
   customer: string;
   email: string;
+  customerId?: string;
   products: PurchaseItem[];
   total: number;
   date: string;
@@ -53,14 +54,24 @@ export function RecentPurchases() {
     
     window.addEventListener('storage', handleStorageChange);
     
+    // Custom event listener for non-storage events
+    const handleCustomStorage = () => loadPurchases();
+    window.addEventListener('storage', handleCustomStorage);
+    
     // Poll for changes every 2 seconds as a fallback
     const interval = setInterval(loadPurchases, 2000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storage', handleCustomStorage);
       clearInterval(interval);
     };
   }, [currentCompany]);
+  
+  const handleViewCustomer = (customerId: string) => {
+    // In a real app, this would navigate to the customer profile
+    console.log("Viewing customer:", customerId);
+  };
   
   if (purchases.length === 0) {
     return (
@@ -104,9 +115,14 @@ export function RecentPurchases() {
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="font-medium">{purchase.customer}</p>
-                  <p className="text-sm text-muted-foreground">{purchase.email}</p>
+                <div className="flex items-center">
+                  <div className="bg-primary/10 rounded-full p-1.5 mr-2">
+                    <User className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{purchase.customer}</p>
+                    <p className="text-sm text-muted-foreground">{purchase.email}</p>
+                  </div>
                 </div>
                 <Badge variant="outline">₹{purchase.total.toLocaleString()}</Badge>
               </div>
@@ -120,11 +136,24 @@ export function RecentPurchases() {
                 ))}
               </div>
               
-              <div className="flex items-center text-xs text-muted-foreground mt-2">
-                <Calendar className="h-3 w-3 mr-1" />
-                <time dateTime={purchase.date}>
-                  {new Date(purchase.date).toLocaleString()}
-                </time>
+              <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                <div className="flex items-center">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  <time dateTime={purchase.date}>
+                    {new Date(purchase.date).toLocaleString()}
+                  </time>
+                </div>
+                
+                {purchase.customerId && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 text-xs" 
+                    onClick={() => handleViewCustomer(purchase.customerId!)}
+                  >
+                    View Customer
+                  </Button>
+                )}
               </div>
             </div>
           ))}

@@ -17,6 +17,7 @@ import PlatformConnectionsPage from "./pages/PlatformConnectionsPage";
 import NotFound from "./pages/NotFound";
 import { CompanyProvider } from "./contexts/CompanyContext";
 import IshanTechDemo from "./pages/IshanTechDemo";
+import IshanTechAuth from "./pages/IshanTechAuth";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -43,6 +44,7 @@ const App = () => {
               <Route path="/company-profile" element={<CompanyProfile />} />
               <Route path="/platform-connections" element={<PlatformConnectionsPage />} />
               <Route path="/ishantech-demo" element={<IshanTechDemo />} />
+              <Route path="/ishantech-auth" element={<IshanTechAuth />} />
               
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />

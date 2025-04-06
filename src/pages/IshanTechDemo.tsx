@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MainLayout } from "@/layouts/main-layout";
 import { PageContainer, SectionContainer } from "@/components/ui/container";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, Check, ArrowRight, BarChart3, Home } from "lucide-react";
+import { ShoppingCart, Check, ArrowRight, BarChart3, Home, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "@/contexts/CompanyContext";
 import { toast } from "sonner";
@@ -19,6 +19,12 @@ interface Product {
   price: string;
   category: string;
   image: string;
+}
+
+interface CurrentUser {
+  id: string;
+  name: string;
+  email: string;
 }
 
 const products: Product[] = [
@@ -60,9 +66,57 @@ export default function IshanTechDemo() {
   const [currentStep, setCurrentStep] = useState<'browse' | 'checkout' | 'complete'>('browse');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentCompany } = useCompany();
+
+  useEffect(() => {
+    // Check if user is logged in
+    if (currentCompany?.id) {
+      const userJson = localStorage.getItem(`ishantech_current_user_${currentCompany.id}`);
+      if (userJson) {
+        try {
+          setCurrentUser(JSON.parse(userJson));
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
+    }
+  }, [currentCompany]);
+
+  const handleLogout = () => {
+    if (currentCompany?.id && currentUser) {
+      // Remove current user
+      localStorage.removeItem(`ishantech_current_user_${currentCompany.id}`);
+      
+      // Log activity
+      const activity = {
+        id: `activity-${Date.now()}`,
+        customerId: currentUser.id,
+        customerName: currentUser.name,
+        customerEmail: currentUser.email,
+        type: "Logout",
+        timestamp: new Date().toISOString(),
+      };
+      
+      // Add to activities
+      const activitiesKey = `customer_activities_${currentCompany.id}`;
+      const activities = JSON.parse(localStorage.getItem(activitiesKey) || "[]");
+      localStorage.setItem(activitiesKey, JSON.stringify([activity, ...activities]));
+      
+      // Trigger storage event
+      window.dispatchEvent(new Event('storage'));
+      
+      // Reset current user
+      setCurrentUser(null);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully",
+      });
+    }
+  };
 
   const addToCart = (productId: string) => {
     setSelectedProducts([...selectedProducts, productId]);
@@ -79,6 +133,16 @@ export default function IshanTechDemo() {
   };
 
   const proceedToCheckout = () => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "Please login or create an account to continue",
+        variant: "destructive"
+      });
+      navigate("/ishantech-auth");
+      return;
+    }
+    
     if (selectedProducts.length === 0) {
       toast({
         title: "Cart is empty",
@@ -91,14 +155,15 @@ export default function IshanTechDemo() {
   };
 
   const completeOrder = () => {
-    // Here we would normally call an API to process the order
+    if (!currentUser) return;
     
     // Update local storage with the purchase for CRM integration
     if (currentCompany) {
       const purchaseData = {
         id: `purchase-${Date.now()}`,
-        customer: "Ishan Prakash",
-        email: "ishan@ishantech.com",
+        customer: currentUser.name,
+        email: currentUser.email,
+        customerId: currentUser.id,
         products: selectedProducts.map(id => {
           const product = products.find(p => p.id === id);
           return {
@@ -116,11 +181,26 @@ export default function IshanTechDemo() {
       
       // Store the purchase in localStorage
       const existingPurchases = JSON.parse(localStorage.getItem(`purchases_${currentCompany.id}`) || "[]");
-      localStorage.setItem(`purchases_${currentCompany.id}`, JSON.stringify([...existingPurchases, purchaseData]));
+      localStorage.setItem(`purchases_${currentCompany.id}`, JSON.stringify([purchaseData, ...existingPurchases]));
+      
+      // Create an activity for this purchase
+      const activity = {
+        id: `activity-${Date.now()}`,
+        customerId: currentUser.id,
+        customerName: currentUser.name,
+        customerEmail: currentUser.email,
+        type: "Purchase",
+        details: `Purchased ${selectedProducts.length} items for ₹${purchaseData.total.toLocaleString()}`,
+        timestamp: purchaseData.date,
+      };
+      
+      // Add to activities
+      const activitiesKey = `customer_activities_${currentCompany.id}`;
+      const activities = JSON.parse(localStorage.getItem(activitiesKey) || "[]");
+      localStorage.setItem(activitiesKey, JSON.stringify([activity, ...activities]));
       
       // Dispatch custom event to notify other tabs/components about the purchase
-      const event = new Event('storage');
-      window.dispatchEvent(event);
+      window.dispatchEvent(new Event('storage'));
       
       // Use toast to notify about successful integration with CRM
       toast({
@@ -141,6 +221,11 @@ export default function IshanTechDemo() {
       description: "Your purchase data has been integrated with the CRM",
     });
     setTimeout(() => navigate('/'), 1000);
+  };
+
+  // Redirect to auth if not logged in
+  const goToAuth = () => {
+    navigate("/ishantech-auth");
   };
 
   return (
@@ -164,6 +249,33 @@ export default function IshanTechDemo() {
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Back to CRM
                 </Button>
+                
+                {currentUser ? (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-primary-foreground hidden md:inline-block">
+                      Hello, {currentUser.name}
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={handleLogout}
+                      className="text-primary-foreground"
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={goToAuth}
+                    className="text-primary-foreground"
+                  >
+                    <User className="h-5 w-5 mr-2" />
+                    Login
+                  </Button>
+                )}
+                
                 <Button variant="ghost" size="icon" className="text-primary-foreground">
                   <ShoppingCart className="h-5 w-5" />
                   {selectedProducts.length > 0 && (
@@ -386,8 +498,8 @@ export default function IshanTechDemo() {
                   <div>
                     <h3 className="font-medium mb-2">Customer Information</h3>
                     <div className="border rounded-md p-3">
-                      <p><span className="font-medium">Name:</span> Ishan Prakash</p>
-                      <p><span className="font-medium">Email:</span> ishan@ishantech.com</p>
+                      <p><span className="font-medium">Name:</span> {currentUser?.name}</p>
+                      <p><span className="font-medium">Email:</span> {currentUser?.email}</p>
                       <p><span className="font-medium">Company:</span> IshanTech</p>
                     </div>
                   </div>
