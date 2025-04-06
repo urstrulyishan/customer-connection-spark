@@ -7,67 +7,47 @@ import { Input } from "@/components/ui/input";
 import { Filter, Plus, Search } from "lucide-react";
 import { useState } from "react";
 
-// Sample data
+// Updated sample data with the required names
 const customers: CustomerData[] = [
   {
     id: "1",
-    name: "Arjun Patel",
-    email: "arjun@example.com",
+    name: "Ishan Prakash",
+    email: "ishan@ishantech.com",
     phone: "(555) 123-4567",
-    company: "Acme Inc.",
+    company: "IshanTech",
     status: "active",
     lastContact: "Today",
-    initials: "AP"
+    initials: "IP"
   },
   {
     id: "2",
-    name: "Priya Singh",
-    email: "priya@example.com",
+    name: "Prakhar Gupta",
+    email: "prakhar@example.com",
     phone: "(555) 234-5678",
-    company: "GlobalTech",
+    company: "Synergy Corp",
     status: "new",
     lastContact: "Yesterday",
-    initials: "PS"
+    initials: "PG"
   },
   {
     id: "3",
-    name: "Vikram Sharma",
-    email: "vikram@example.com",
+    name: "Abhinaya Singh",
+    email: "abhinaya@innovate.com",
     phone: "(555) 345-6789",
     company: "Innovate LLC",
     status: "active",
     lastContact: "3 days ago",
-    initials: "VS"
+    initials: "AS"
   },
   {
     id: "4",
-    name: "Deepak Reddy",
-    email: "deepak@example.com",
+    name: "Divyanshi Sharma",
+    email: "divyanshi@matrix.com",
     phone: "(555) 456-7890",
-    company: "Tech Solutions",
+    company: "Matrix Corp",
     status: "inactive",
     lastContact: "1 week ago",
-    initials: "DR"
-  },
-  {
-    id: "5",
-    name: "Anjali Mehta",
-    email: "anjali@example.com",
-    phone: "(555) 567-8901",
-    company: "Design Studio",
-    status: "active",
-    lastContact: "2 days ago",
-    initials: "AM"
-  },
-  {
-    id: "6",
-    name: "Rahul Joshi",
-    email: "rahul@example.com",
-    phone: "(555) 678-9012",
-    company: "Marketing Pros",
-    status: "new",
-    lastContact: "Today",
-    initials: "RJ"
+    initials: "DS"
   }
 ];
 
@@ -84,7 +64,7 @@ export default function CustomersPage() {
     <MainLayout>
       <PageContainer>
         <div className="flex flex-col space-y-2 mb-6">
-          <h1 className="font-semibold">Customers</h1>
+          <h1 className="text-2xl font-bold text-center mb-4">Customer Relationship Model</h1>
           <p className="text-muted-foreground">Manage your customer relationships.</p>
         </div>
         

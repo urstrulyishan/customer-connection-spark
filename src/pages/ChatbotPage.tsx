@@ -7,7 +7,7 @@ export default function ChatbotPage() {
   return (
     <MainLayout>
       <PageContainer className="py-6">
-        <h1 className="text-2xl font-bold mb-6">AI Chat Assistant</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Customer Relationship Model</h1>
         <ChatInterface />
       </PageContainer>
     </MainLayout>

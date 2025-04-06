@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMutation } from "@tanstack/react-query";
-import { Mic, Send, StopCircle, Bot, User, Paperclip, Image } from "lucide-react";
+import { Mic, Send, StopCircle, Bot, User, Paperclip, Image, Brain } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -31,34 +32,128 @@ interface Message {
   timestamp: Date;
 }
 
-// Mock API call to simulate sending a message to a chatbot
-const sendMessageToBot = async (message: string): Promise<string> => {
-  // This simulates an API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  
-  // Simple responses based on user input
-  const lowercaseMessage = message.toLowerCase();
-
-  if (lowercaseMessage.includes("hello") || lowercaseMessage.includes("hi")) {
-    return "Hello! How can I assist you today?";
-  } else if (lowercaseMessage.includes("help")) {
-    return "I'm here to help. What do you need assistance with?";
-  } else if (lowercaseMessage.includes("bye") || lowercaseMessage.includes("goodbye")) {
-    return "Goodbye! Have a great day!";
-  } else if (lowercaseMessage.includes("thank")) {
-    return "You're welcome! Is there anything else you need help with?";
-  } else if (lowercaseMessage.includes("feature") || lowercaseMessage.includes("can you")) {
-    return "Currently I can chat with you, but more features will be added soon. What would you like to know?";
-  } else {
-    return "I understand your message. How else can I assist you today?";
+// Enhanced mock data for the AI chatbot
+const customerDatabase = [
+  {
+    name: "Ishan Prakash",
+    email: "ishan@ishantech.com",
+    lastPurchase: { 
+      product: "Enterprise CRM Suite", 
+      amount: "₹24,999", 
+      date: "2023-04-01" 
+    },
+    interactions: 15,
+    status: "active"
+  },
+  {
+    name: "Prakhar Gupta",
+    email: "prakhar@example.com",
+    lastPurchase: { 
+      product: "Data Analytics Package", 
+      amount: "₹18,500", 
+      date: "2023-03-28" 
+    },
+    interactions: 8,
+    status: "new"
+  },
+  {
+    name: "Abhinaya Singh",
+    email: "abhinaya@innovate.com",
+    lastPurchase: { 
+      product: "Cloud Integration Service", 
+      amount: "₹32,000", 
+      date: "2023-03-15" 
+    },
+    interactions: 12,
+    status: "active"
+  },
+  {
+    name: "Divyanshi Sharma",
+    email: "divyanshi@matrix.com",
+    lastPurchase: { 
+      product: "Security Suite Premium", 
+      amount: "₹15,750", 
+      date: "2023-04-03" 
+    },
+    interactions: 5,
+    status: "potential"
   }
+];
+
+// Enhanced AI response generation
+const generateAIResponse = (message: string): Promise<string> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const lowercaseMessage = message.toLowerCase();
+      
+      // Check for customer queries
+      if (lowercaseMessage.includes("ishan") && lowercaseMessage.includes("purchase")) {
+        const customer = customerDatabase.find(c => c.name.toLowerCase().includes("ishan"));
+        resolve(`Ishan Prakash's latest purchase was ${customer?.lastPurchase.product} for ${customer?.lastPurchase.amount} on ${new Date(customer?.lastPurchase.date!).toLocaleDateString()}.`);
+      } 
+      else if (lowercaseMessage.includes("prakhar") && lowercaseMessage.includes("purchase")) {
+        const customer = customerDatabase.find(c => c.name.toLowerCase().includes("prakhar"));
+        resolve(`Prakhar Gupta's latest purchase was ${customer?.lastPurchase.product} for ${customer?.lastPurchase.amount} on ${new Date(customer?.lastPurchase.date!).toLocaleDateString()}.`);
+      }
+      else if (lowercaseMessage.includes("abhinaya") && lowercaseMessage.includes("purchase")) {
+        const customer = customerDatabase.find(c => c.name.toLowerCase().includes("abhinaya"));
+        resolve(`Abhinaya Singh's latest purchase was ${customer?.lastPurchase.product} for ${customer?.lastPurchase.amount} on ${new Date(customer?.lastPurchase.date!).toLocaleDateString()}.`);
+      }
+      else if (lowercaseMessage.includes("divyanshi") && lowercaseMessage.includes("purchase")) {
+        const customer = customerDatabase.find(c => c.name.toLowerCase().includes("divyanshi"));
+        resolve(`Divyanshi Sharma's latest purchase was ${customer?.lastPurchase.product} for ${customer?.lastPurchase.amount} on ${new Date(customer?.lastPurchase.date!).toLocaleDateString()}.`);
+      }
+      // Customer data queries
+      else if (lowercaseMessage.includes("customer") && lowercaseMessage.includes("data")) {
+        resolve("I can help you access customer data. You can ask about specific customers like 'Show me Ishan's latest purchase' or view analytics by asking 'Show me sales trends'.");
+      }
+      // Analytics queries
+      else if (lowercaseMessage.includes("analytics") || lowercaseMessage.includes("trends") || lowercaseMessage.includes("statistics")) {
+        resolve("Our AI-powered analytics show positive growth trends. Total sales this month are ₹48,590, up 8% from last month. Lead quality score is at 72%, showing a 5% improvement.");
+      }
+      // Integration/sync questions
+      else if (lowercaseMessage.includes("connect") || lowercaseMessage.includes("integrate") || lowercaseMessage.includes("sync")) {
+        resolve("You can connect external platforms by visiting the Platform Connections page. We support API, webhook, database, email, and e-commerce integrations. Would you like me to navigate you there?");
+      }
+      // IshanTech demo
+      else if (lowercaseMessage.includes("ishantech") || lowercaseMessage.includes("demo")) {
+        resolve("The IshanTech demo website is available for testing our CRM integration. You can visit it to make sample purchases that will automatically reflect in our analytics dashboard. Would you like me to take you to the demo site?");
+      }
+      // Help or command list
+      else if (lowercaseMessage.includes("help") || lowercaseMessage.includes("commands") || lowercaseMessage.includes("what can you do")) {
+        resolve("I can help you with:\n- Customer information (e.g., 'Show me Ishan's data')\n- Analytics and trends (e.g., 'Show sales trends')\n- Platform connections (e.g., 'How to connect my website')\n- IshanTech demo (e.g., 'Take me to the demo site')\n- Navigating the CRM (e.g., 'Go to leads page')");
+      }
+      // Navigation
+      else if (lowercaseMessage.includes("go to") || lowercaseMessage.includes("navigate to") || lowercaseMessage.includes("take me to")) {
+        if (lowercaseMessage.includes("customer")) {
+          resolve("I'll navigate you to the Customers page where you can manage all your customer relationships.");
+        } else if (lowercaseMessage.includes("lead")) {
+          resolve("I'll take you to the Leads page where you can track potential customers and sales opportunities.");
+        } else if (lowercaseMessage.includes("message")) {
+          resolve("I'll direct you to the Messages page where you can manage all communications with your customers.");
+        } else if (lowercaseMessage.includes("demo") || lowercaseMessage.includes("ishantech")) {
+          resolve("I'll take you to the IshanTech demo site where you can see our CRM integration in action.");
+        } else {
+          resolve("I can navigate you to different pages in the CRM. Where would you like to go? Customers, Leads, Messages, or the IshanTech demo?");
+        }
+      }
+      // Generic greeting
+      else if (lowercaseMessage.includes("hello") || lowercaseMessage.includes("hi")) {
+        resolve("Hello! I'm your AI assistant for the Customer Relationship Model. How can I help you today? You can ask about customer data, analytics, platform connections, or navigate to different parts of the CRM.");
+      }
+      // Generic fallback
+      else {
+        resolve("I understand you're asking about " + message.split(" ").slice(0, 3).join(" ") + "... I can provide information on customers, analytics, platform connections, and help you navigate the CRM. Could you please clarify what specific information you need?");
+      }
+    }, 800);
+  });
 };
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: "Hello! How can I help you today?",
+      content: "Hello! I'm your AI assistant for the Customer Relationship Model. How can I help you today?",
       isUser: false,
       timestamp: new Date(),
     },
@@ -70,6 +165,7 @@ export function ChatInterface() {
   const { toast } = useToast();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -77,7 +173,7 @@ export function ChatInterface() {
   }, [messages]);
 
   const sendMessageMutation = useMutation({
-    mutationFn: sendMessageToBot,
+    mutationFn: generateAIResponse,
     onSuccess: (response) => {
       const botMessage: Message = {
         id: Date.now().toString(),
@@ -86,15 +182,32 @@ export function ChatInterface() {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, botMessage]);
+      
+      // Handle navigation based on AI response
+      handleNavigation(response);
     },
     onError: () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: "Failed to process your request. Please try again.",
       });
     },
   });
+
+  const handleNavigation = (response: string) => {
+    if (response.includes("I'll navigate you to the Customers page")) {
+      setTimeout(() => navigate("/customers"), 1000);
+    } else if (response.includes("I'll take you to the Leads page")) {
+      setTimeout(() => navigate("/leads"), 1000);
+    } else if (response.includes("I'll direct you to the Messages page")) {
+      setTimeout(() => navigate("/messages"), 1000);
+    } else if (response.includes("I'll take you to the IshanTech demo site")) {
+      setTimeout(() => navigate("/ishantech-demo"), 1000);
+    } else if (response.includes("Platform Connections page") && response.includes("navigate you there")) {
+      setTimeout(() => navigate("/platform-connections"), 1000);
+    }
+  };
 
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -157,7 +270,7 @@ export function ChatInterface() {
     setMessages([
       {
         id: "welcome",
-        content: "Hello! How can I help you today?",
+        content: "Hello! I'm your AI assistant for the Customer Relationship Model. How can I help you today?",
         isUser: false,
         timestamp: new Date(),
       },
@@ -180,11 +293,11 @@ export function ChatInterface() {
       )}>
         <div className="flex items-center gap-3">
           <Avatar className={darkMode ? "bg-zinc-700" : "bg-primary/10"}>
-            <Bot className="h-5 w-5" />
+            <Brain className="h-5 w-5" />
           </Avatar>
           <div>
             <h3 className="font-medium">AI Assistant</h3>
-            <p className="text-xs text-muted-foreground">Online</p>
+            <p className="text-xs text-muted-foreground">Customer Relationship Model</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -255,7 +368,7 @@ export function ChatInterface() {
                   "h-8 w-8", 
                   darkMode ? "bg-zinc-700" : "bg-primary/10"
                 )}>
-                  <Bot className="h-4 w-4" />
+                  <Brain className="h-4 w-4" />
                 </Avatar>
               )}
               <div
@@ -270,7 +383,7 @@ export function ChatInterface() {
                       : "bg-muted"
                 )}
               >
-                <p className="text-sm">{message.content}</p>
+                <p className="text-sm whitespace-pre-line">{message.content}</p>
                 <span className="text-xs opacity-70 mt-1 block">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
@@ -302,7 +415,7 @@ export function ChatInterface() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
+                placeholder="Ask me about customers, analytics, or how to navigate the CRM..."
                 className={cn(
                   "min-h-[80px] resize-none pr-10",
                   darkMode ? "bg-zinc-800 border-zinc-700" : ""
@@ -315,7 +428,7 @@ export function ChatInterface() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
+                placeholder="Ask me about customers, analytics, or how to navigate the CRM..."
                 className={cn(
                   "pr-10",
                   darkMode ? "bg-zinc-800 border-zinc-700" : ""

@@ -5,7 +5,7 @@ import { MainLayout } from "@/layouts/main-layout";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { CustomerActivity } from "@/components/dashboard/customer-activity";
 import { CustomerCard, CustomerData } from "@/components/customers/customer-card";
-import { Users, DollarSign, Clock, BarChart, Link2, Brain } from "lucide-react";
+import { Users, DollarSign, BarChart, Link2, Brain, TrendingUp } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { getCompanyData } from "@/utils/companyDataUtils";
 import { LeadData } from "@/types/leads";
 import { analyzeLeadQuality, getPredictedConversions } from "@/utils/aiAnalysisUtils";
+import { LeadInsights } from "@/components/leads/lead-insights";
 
 export default function Index() {
   const { currentCompany, hasActivePlatformConnections } = useCompany();
@@ -24,74 +25,74 @@ export default function Index() {
     predictedConversions: 0
   });
 
-  // Sample data - in a real app this would come from a database
+  // Updated sample data with the required names
   const sampleCustomers: CustomerData[] = [
     {
       id: "1",
-      name: "Arjun Patel",
-      email: "arjun@example.com",
+      name: "Ishan Prakash",
+      email: "ishan@ishantech.com",
       phone: "(555) 123-4567",
-      company: "Acme Inc.",
+      company: "IshanTech",
       status: "active",
       lastContact: "Today",
-      initials: "AP"
+      initials: "IP"
     },
     {
       id: "2",
-      name: "Priya Singh",
-      email: "priya@example.com",
+      name: "Prakhar Gupta",
+      email: "prakhar@example.com",
       phone: "(555) 234-5678",
-      company: "GlobalTech",
+      company: "Synergy Corp",
       status: "new",
       lastContact: "Yesterday",
-      initials: "PS"
+      initials: "PG"
     },
     {
       id: "3",
-      name: "Vikram Sharma",
-      email: "vikram@example.com",
+      name: "Abhinaya Singh",
+      email: "abhinaya@innovate.com",
       phone: "(555) 345-6789",
       company: "Innovate LLC",
       status: "active",
       lastContact: "3 days ago",
-      initials: "VS"
+      initials: "AS"
     }
   ];
 
-  // Sample leads data
+  // Updated sample leads with the required names
   const sampleLeads: LeadData[] = [
     {
       id: "1",
-      name: "Siddharth Malhotra",
-      email: "siddharth@matrix.com",
+      name: "Divyanshi Sharma",
+      email: "divyanshi@matrix.com",
       company: "Matrix Corp",
       status: "new",
       score: "hot",
       source: "Website",
       date: "Today",
-      initials: "SM"
+      initials: "DS"
     },
     {
       id: "2",
-      name: "Kavita Bajaj",
-      email: "kavita@enterprise.com",
-      company: "Enterprise Solutions",
+      name: "Ishan Prakash",
+      email: "ishan@ishantech.com",
+      company: "IshanTech",
       status: "contacted",
       score: "warm",
       source: "Referral",
       date: "Yesterday",
-      initials: "KB"
+      initials: "IP"
     },
     {
       id: "3",
-      name: "Mohan Desai",
-      email: "mohan@innovative.com",
-      company: "Innovative Tech",
+      name: "Prakhar Gupta",
+      email: "prakhar@example.com",
+      company: "Synergy Corp",
       status: "qualified",
       score: "hot",
       source: "LinkedIn",
       date: "2 days ago",
-      initials: "MD"
+      initials: "PG"
     }
   ];
 
@@ -148,9 +149,9 @@ export default function Index() {
     <MainLayout>
       <PageContainer>
         <div className="flex flex-col space-y-2 mb-6">
-          <h1 className="font-semibold">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-center mb-4">Customer Relationship Model</h1>
           <p className="text-muted-foreground">
-            Welcome back to {currentCompany?.companyName || "your"} CRM dashboard.
+            Welcome to your {currentCompany?.companyName || "IshanTech"} CRM dashboard.
           </p>
         </div>
         
@@ -197,7 +198,7 @@ export default function Index() {
             <MetricCard
               title="Predicted Conversions"
               value={aiAnalytics.predictedConversions.toString()}
-              icon={BarChart}
+              icon={TrendingUp}
               change={{ value: 2, trend: "up" }}
               className="animate-fade-in animate-delay-300"
             />
@@ -223,6 +224,11 @@ export default function Index() {
               <CustomerActivity />
             </div>
           </div>
+        </SectionContainer>
+
+        <SectionContainer className="py-4">
+          <h2 className="text-lg font-medium mb-4">AI Insights</h2>
+          <LeadInsights leads={leads} />
         </SectionContainer>
       </PageContainer>
     </MainLayout>

@@ -8,7 +8,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import CustomersPage from "./pages/CustomersPage";
 import LeadsPage from "./pages/LeadsPage";
-import InteractionsPage from "./pages/InteractionsPage";
 import MessagesPage from "./pages/MessagesPage";
 import ChatbotPage from "./pages/ChatbotPage";
 import CompanyRegistration from "./pages/CompanyRegistration";
@@ -17,6 +16,7 @@ import CompanyProfile from "./pages/CompanyProfile";
 import PlatformConnectionsPage from "./pages/PlatformConnectionsPage";
 import NotFound from "./pages/NotFound";
 import { CompanyProvider } from "./contexts/CompanyContext";
+import IshanTechDemo from "./pages/IshanTechDemo";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -38,11 +38,11 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/customers" element={<CustomersPage />} />
               <Route path="/leads" element={<LeadsPage />} />
-              <Route path="/interactions" element={<InteractionsPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/chatbot" element={<ChatbotPage />} />
               <Route path="/company-profile" element={<CompanyProfile />} />
               <Route path="/platform-connections" element={<PlatformConnectionsPage />} />
+              <Route path="/ishantech-demo" element={<IshanTechDemo />} />
               
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />
