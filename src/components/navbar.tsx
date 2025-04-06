@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, Clock, MessageSquare, Menu, X, Bot, Building, LogOut } from "lucide-react";
+import { BarChart3, Users, Clock, MessageSquare, Menu, X, Bot, Building, LogOut, ShoppingCart } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -37,6 +37,11 @@ const navItems = [
     name: "Chatbot",
     path: "/chatbot",
     icon: Bot,
+  },
+  {
+    name: "IshanTech Demo",
+    path: "/ishantech-demo",
+    icon: ShoppingCart,
   },
 ];
 

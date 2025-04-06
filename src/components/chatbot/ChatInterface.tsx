@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,7 +116,7 @@ const generateAIResponse = (message: string): Promise<string> => {
       }
       // IshanTech demo
       else if (lowercaseMessage.includes("ishantech") || lowercaseMessage.includes("demo")) {
-        resolve("The IshanTech demo website is available for testing our CRM integration. You can visit it to make sample purchases that will automatically reflect in our analytics dashboard. Would you like me to take you to the demo site?");
+        resolve("The IshanTech demo website is available for testing our CRM integration. You can visit it to make sample purchases that will automatically reflect in our analytics dashboard. I'll navigate you to the demo site now.");
       }
       // Help or command list
       else if (lowercaseMessage.includes("help") || lowercaseMessage.includes("commands") || lowercaseMessage.includes("what can you do")) {
@@ -202,7 +201,8 @@ export function ChatInterface() {
       setTimeout(() => navigate("/leads"), 1000);
     } else if (response.includes("I'll direct you to the Messages page")) {
       setTimeout(() => navigate("/messages"), 1000);
-    } else if (response.includes("I'll take you to the IshanTech demo site")) {
+    } else if (response.includes("I'll take you to the IshanTech demo site") || 
+               (response.includes("IshanTech demo") && response.includes("navigate you"))) {
       setTimeout(() => navigate("/ishantech-demo"), 1000);
     } else if (response.includes("Platform Connections page") && response.includes("navigate you there")) {
       setTimeout(() => navigate("/platform-connections"), 1000);
