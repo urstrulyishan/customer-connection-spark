@@ -2,15 +2,22 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Calendar, ArrowRight, User } from "lucide-react";
+import { ShoppingCart, Calendar, ArrowRight, User, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "@/contexts/CompanyContext";
+import { getSentimentColor } from "@/utils/sentimentAnalysisUtils";
 
 interface PurchaseItem {
   id: string;
   name: string;
   price: string;
+}
+
+interface SentimentResult {
+  sentiment: 'positive' | 'negative' | 'neutral';
+  score: number;
+  confidence: number;
 }
 
 interface Purchase {
@@ -21,6 +28,8 @@ interface Purchase {
   products: PurchaseItem[];
   total: number;
   date: string;
+  feedback?: string;
+  sentiment?: SentimentResult;
 }
 
 export function RecentPurchases() {
@@ -135,6 +144,26 @@ export function RecentPurchases() {
                   </div>
                 ))}
               </div>
+              
+              {purchase.feedback && (
+                <div className="mt-2 text-sm">
+                  <div className="flex items-center gap-1 mb-1">
+                    <MessageSquare className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Feedback:</span>
+                  </div>
+                  <p className="italic text-muted-foreground">{purchase.feedback}</p>
+                  
+                  {purchase.sentiment && (
+                    <div className="mt-1 flex">
+                      <span 
+                        className={`text-xs px-2 py-0.5 rounded-full ${getSentimentColor(purchase.sentiment.sentiment)}`}
+                      >
+                        Sentiment: {purchase.sentiment.sentiment.charAt(0).toUpperCase() + purchase.sentiment.sentiment.slice(1)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
               
               <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
                 <div className="flex items-center">

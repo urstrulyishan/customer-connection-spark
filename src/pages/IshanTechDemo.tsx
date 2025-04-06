@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { MainLayout } from "@/layouts/main-layout";
 import { PageContainer, SectionContainer } from "@/components/ui/container";
@@ -11,6 +10,8 @@ import { ShoppingCart, Check, ArrowRight, BarChart3, Home, LogOut, User } from "
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "@/contexts/CompanyContext";
 import { toast } from "sonner";
+import { analyzeSentiment } from "@/utils/sentimentAnalysisUtils";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Product {
   id: string;
@@ -67,6 +68,7 @@ export default function IshanTechDemo() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [feedback, setFeedback] = useState<string>('');
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentCompany } = useCompany();
@@ -157,6 +159,9 @@ export default function IshanTechDemo() {
   const completeOrder = () => {
     if (!currentUser) return;
     
+    // Analyze feedback sentiment
+    const sentimentResult = analyzeSentiment(feedback);
+    
     // Update local storage with the purchase for CRM integration
     if (currentCompany) {
       const purchaseData = {
@@ -176,7 +181,9 @@ export default function IshanTechDemo() {
           const product = products.find(p => p.id === id);
           return total + parseInt(product?.price.replace(/[^\d]/g, '') || "0");
         }, 0),
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        feedback: feedback,
+        sentiment: sentimentResult
       };
       
       // Store the purchase in localStorage
@@ -192,6 +199,8 @@ export default function IshanTechDemo() {
         type: "Purchase",
         details: `Purchased ${selectedProducts.length} items for ₹${purchaseData.total.toLocaleString()}`,
         timestamp: purchaseData.date,
+        feedback: feedback,
+        sentiment: sentimentResult
       };
       
       // Add to activities
@@ -211,8 +220,9 @@ export default function IshanTechDemo() {
     
     setCurrentStep('complete');
     
-    // Clear cart
+    // Clear cart and feedback
     setSelectedProducts([]);
+    setFeedback('');
   };
 
   const viewDashboard = () => {
@@ -502,6 +512,16 @@ export default function IshanTechDemo() {
                       <p><span className="font-medium">Email:</span> {currentUser?.email}</p>
                       <p><span className="font-medium">Company:</span> IshanTech</p>
                     </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-medium mb-2">Feedback</h3>
+                    <Textarea
+                      placeholder="How do you feel about your purchase? (optional)"
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
+                      className="w-full"
+                    />
                   </div>
 
                   <div>
