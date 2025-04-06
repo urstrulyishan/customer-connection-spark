@@ -5,7 +5,7 @@ import { MainLayout } from "@/layouts/main-layout";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { CustomerActivity } from "@/components/dashboard/customer-activity";
 import { CustomerCard, CustomerData } from "@/components/customers/customer-card";
-import { Users, DollarSign, BarChart, Link2, Brain, TrendingUp } from "lucide-react";
+import { Users, DollarSign, Brain, TrendingUp, Link2 } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -14,6 +14,7 @@ import { getCompanyData } from "@/utils/companyDataUtils";
 import { LeadData } from "@/types/leads";
 import { analyzeLeadQuality, getPredictedConversions } from "@/utils/aiAnalysisUtils";
 import { LeadInsights } from "@/components/leads/lead-insights";
+import { RecentPurchases } from "@/components/dashboard/recent-purchases";
 
 export default function Index() {
   const { currentCompany, hasActivePlatformConnections } = useCompany();
@@ -24,6 +25,7 @@ export default function Index() {
     leadScore: 0,
     predictedConversions: 0
   });
+  const [salesTotal, setSalesTotal] = useState("₹0");
 
   // Updated sample data with the required names
   const sampleCustomers: CustomerData[] = [
@@ -138,6 +140,30 @@ export default function Index() {
         predictedConversions: getPredictedConversions(sampleLeads)
       });
     }
+    
+    // Calculate sales total from purchases
+    const storedPurchases = localStorage.getItem(`purchases_${companyId}`);
+    if (storedPurchases) {
+      const parsedPurchases = JSON.parse(storedPurchases);
+      const total = parsedPurchases.reduce((sum: number, purchase: any) => sum + purchase.total, 0);
+      setSalesTotal(`₹${total.toLocaleString()}`);
+    }
+    
+    // Set up event listener for storage changes
+    const handleStorageChange = () => {
+      const updatedPurchases = localStorage.getItem(`purchases_${companyId}`);
+      if (updatedPurchases) {
+        const parsedPurchases = JSON.parse(updatedPurchases);
+        const total = parsedPurchases.reduce((sum: number, purchase: any) => sum + purchase.total, 0);
+        setSalesTotal(`₹${total.toLocaleString()}`);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [currentCompany, navigate]);
 
   // If not logged in yet, show nothing until redirect happens
@@ -183,7 +209,7 @@ export default function Index() {
             />
             <MetricCard
               title="Sales This Month"
-              value="₹48,590"
+              value={salesTotal}
               icon={DollarSign}
               change={{ value: 8, trend: "up" }}
               className="animate-fade-in animate-delay-100"
@@ -227,8 +253,10 @@ export default function Index() {
         </SectionContainer>
 
         <SectionContainer className="py-4">
-          <h2 className="text-lg font-medium mb-4">AI Insights</h2>
-          <LeadInsights leads={leads} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <RecentPurchases />
+            <LeadInsights leads={leads} />
+          </div>
         </SectionContainer>
       </PageContainer>
     </MainLayout>

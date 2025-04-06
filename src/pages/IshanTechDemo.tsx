@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingCart, Check, ArrowRight, BarChart3, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "@/contexts/CompanyContext";
+import { toast } from "sonner";
 
 interface Product {
   id: string;
@@ -116,6 +117,16 @@ export default function IshanTechDemo() {
       // Store the purchase in localStorage
       const existingPurchases = JSON.parse(localStorage.getItem(`purchases_${currentCompany.id}`) || "[]");
       localStorage.setItem(`purchases_${currentCompany.id}`, JSON.stringify([...existingPurchases, purchaseData]));
+      
+      // Dispatch custom event to notify other tabs/components about the purchase
+      const event = new Event('storage');
+      window.dispatchEvent(event);
+      
+      // Use toast to notify about successful integration with CRM
+      toast({
+        title: "Purchase Integrated with CRM",
+        description: "Your purchase data has been sent to the CRM system",
+      });
     }
     
     setCurrentStep('complete');
