@@ -36,6 +36,8 @@ const sampleActivities: ActivityItem[] = [
   {
     id: "1",
     type: "message",
+    customerName: "Ravi Verma",
+    timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(), // 10 minutes ago
     customer: {
       name: "Ravi Verma",
       initials: "RV",
@@ -46,6 +48,8 @@ const sampleActivities: ActivityItem[] = [
   {
     id: "2",
     type: "task",
+    customerName: "Ananya Gupta",
+    timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
     customer: {
       name: "Ananya Gupta",
       initials: "AG",
@@ -56,6 +60,8 @@ const sampleActivities: ActivityItem[] = [
   {
     id: "3",
     type: "meeting",
+    customerName: "Neha Kapoor",
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
     customer: {
       name: "Neha Kapoor",
       initials: "NK",
@@ -66,6 +72,8 @@ const sampleActivities: ActivityItem[] = [
   {
     id: "4",
     type: "message",
+    customerName: "Rajesh Kumar",
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Yesterday
     customer: {
       name: "Rajesh Kumar",
       initials: "RK",
