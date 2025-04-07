@@ -5,15 +5,24 @@ import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp } from "lucide-react";
 
+interface FeedbackItem {
+  date: string;
+  sentiment: {
+    sentiment: 'positive' | 'negative' | 'neutral';
+    score: number;
+  };
+  text: string;
+}
+
 interface SentimentTrendsProps {
-  feedbackData: any[];
+  feedbackData: FeedbackItem[];
 }
 
 export function SentimentTrends({ feedbackData }: SentimentTrendsProps) {
   // Process data to create trend over time
   const trendsData = useMemo(() => {
     // Group by date
-    const groupedByDate = feedbackData.reduce((acc: Record<string, any[]>, curr) => {
+    const groupedByDate = feedbackData.reduce((acc: Record<string, FeedbackItem[]>, curr) => {
       // Format the date to YYYY-MM-DD
       const date = new Date(curr.date);
       const dateStr = date.toISOString().split('T')[0];

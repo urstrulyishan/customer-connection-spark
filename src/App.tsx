@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from "./pages/Index";
 import CustomersPage from "./pages/CustomersPage";
 import LeadsPage from "./pages/LeadsPage";
 import CompanyLogin from "./pages/CompanyLogin";
-import PlatformConnections from "./pages/PlatformConnections";
+import PlatformConnections from "./pages/PlatformConnectionsPage";
 import IshanTechAuth from "./pages/IshanTechAuth";
 import IshanTechDemo from "./pages/IshanTechDemo";
 import { CompanyProvider } from './contexts/CompanyContext';
