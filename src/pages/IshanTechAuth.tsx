@@ -2,10 +2,10 @@
 import React from "react";
 import { MainLayout } from "@/layouts/main-layout";
 import { PageContainer } from "@/components/ui/container";
-import { AuthForm } from "@/components/ishantech/AuthForm";
 import { Home, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function IshanTechAuth() {
   const navigate = useNavigate();
@@ -38,7 +38,22 @@ export default function IshanTechAuth() {
 
         <PageContainer className="flex-1 flex items-center justify-center py-12">
           <div className="w-full max-w-md">
-            <AuthForm />
+            <Card className="w-full max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle>IshanTech Demo</CardTitle>
+                <CardDescription>
+                  Welcome to IshanTech. We've removed the login requirement to make your experience more streamlined.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full" 
+                  onClick={() => navigate('/ishantech-demo')}
+                >
+                  Continue to Shop
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </PageContainer>
 
