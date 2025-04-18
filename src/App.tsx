@@ -17,6 +17,7 @@ import PlatformConnectionsPage from "./pages/PlatformConnectionsPage";
 import NotFound from "./pages/NotFound";
 import { CompanyProvider } from "./contexts/CompanyContext";
 import IshanTechDemo from "./pages/IshanTechDemo";
+import SentimentAnalysisPage from "./pages/SentimentAnalysisPage";
 
 const App = () => {
   // Create a new QueryClient instance inside the component
@@ -43,6 +44,7 @@ const App = () => {
               <Route path="/chatbot" element={<ChatbotPage />} />
               <Route path="/company-profile" element={<CompanyProfile />} />
               <Route path="/platform-connections" element={<PlatformConnectionsPage />} />
+              <Route path="/sentiment-analysis" element={<SentimentAnalysisPage />} />
               
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />

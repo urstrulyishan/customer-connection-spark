@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, Clock, MessageSquare, Menu, X, Bot, Building, LogOut, ShoppingCart } from "lucide-react";
+import { BarChart3, Users, Clock, MessageSquare, Menu, X, Bot, Building, LogOut, ShoppingCart, LineChart } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -38,6 +39,11 @@ const navItems = [
     icon: Bot,
   },
   {
+    name: "Sentiment Analysis",
+    path: "/sentiment-analysis",
+    icon: LineChart,
+  },
+  {
     name: "IshanTech Demo",
     path: "/ishantech-demo",
     icon: ShoppingCart,
@@ -54,7 +60,7 @@ export function Navbar() {
   
   // Check if user is logged in
   useEffect(() => {
-    const protectedRoutes = ['/', '/customers', '/leads', '/interactions', '/messages', '/chatbot', '/company-profile'];
+    const protectedRoutes = ['/', '/customers', '/leads', '/interactions', '/messages', '/chatbot', '/company-profile', '/sentiment-analysis'];
     
     // If on a protected route and not logged in, redirect to login
     if (protectedRoutes.includes(location.pathname) && !currentCompany && !localStorage.getItem("currentCompany")) {
