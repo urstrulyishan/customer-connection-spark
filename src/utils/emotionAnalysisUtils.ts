@@ -44,8 +44,8 @@ const emotionMapping: Record<string, Emotion> = {
   'neutral': 'neutral',
 };
 
-// Function to detect language
-export const detectLanguage = async (text: string): Promise<string> => {
+// Function to detect language - modified to be synchronous
+export const detectLanguage = (text: string): string => {
   try {
     // Simple language detection based on character sets
     // In a production app, we would use a proper language detection model
@@ -255,7 +255,7 @@ export const analyzeEmotions = async (text: string): Promise<AdvancedSentimentRe
   
   try {
     // Detect language first (this is fast and rule-based)
-    const language = await detectLanguage(text);
+    const language = detectLanguage(text);
     
     // Initialize models
     const modelsInitialized = await initializeModels();
