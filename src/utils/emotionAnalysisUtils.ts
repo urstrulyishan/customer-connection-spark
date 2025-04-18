@@ -1,7 +1,6 @@
-
 import { pipeline, env } from "@huggingface/transformers";
 
-// Configure transformers.js to use WebGPU when available for better performance
+// Configure transformers.js to use WebGPU when available and enable browser cache
 env.useBrowserCache = true;
 env.allowLocalModels = false;
 
@@ -42,6 +41,30 @@ const emotionMapping: Record<string, Emotion> = {
   'frustrated': 'frustration',
   'trust': 'trust',
   'neutral': 'neutral',
+};
+
+// Constants for localStorage keys
+const CACHED_RESPONSES_KEY = 'sentiment_responses_cache';
+const MODEL_FEEDBACK_KEY = 'emotion_feedback_data';
+
+// Function to get cached responses
+const getCachedResponses = (): Array<{text: string, analysis: AdvancedSentimentResult}> => {
+  try {
+    return JSON.parse(localStorage.getItem(CACHED_RESPONSES_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+// Function to save response to cache
+const saveResponseToCache = (text: string, analysis: AdvancedSentimentResult) => {
+  try {
+    const cachedResponses = getCachedResponses();
+    cachedResponses.push({ text, analysis });
+    localStorage.setItem(CACHED_RESPONSES_KEY, JSON.stringify(cachedResponses));
+  } catch (error) {
+    console.error('Error saving to cache:', error);
+  }
 };
 
 // Function to detect language - modified to be synchronous
@@ -239,6 +262,15 @@ const initializeModels = async () => {
 
 // Main function to analyze text for emotions and sentiment
 export const analyzeEmotions = async (text: string): Promise<AdvancedSentimentResult> => {
+  // Check cache first
+  const cachedResponses = getCachedResponses();
+  const cachedResult = cachedResponses.find(item => item.text === text);
+  
+  if (cachedResult) {
+    console.log('Using cached analysis result');
+    return cachedResult.analysis;
+  }
+  
   // Default result in case of error
   const defaultResult: AdvancedSentimentResult = {
     sentiment: 'neutral',
@@ -310,7 +342,9 @@ export const analyzeEmotions = async (text: string): Promise<AdvancedSentimentRe
     // Calculate overall confidence
     const confidenceScore = emotions.length > 0 ? emotions[0].score : 0.5;
     
-    return {
+    
+    
+    const analysisResult: AdvancedSentimentResult = {
       sentiment: sentimentLabel,
       sentimentScore: sentimentScore,
       emotions,
@@ -318,9 +352,16 @@ export const analyzeEmotions = async (text: string): Promise<AdvancedSentimentRe
       language,
       confidenceScore
     };
+    
+    // Save to cache before returning
+    saveResponseToCache(text, analysisResult);
+    
+    return analysisResult;
   } catch (error) {
     console.error('Error analyzing emotions:', error);
-    return analyzeSentimentRuleBased(text); // Use fallback on error
+    const fallbackResult = analyzeSentimentRuleBased(text);
+    saveResponseToCache(text, fallbackResult); // Cache fallback results too
+    return fallbackResult;
   }
 };
 
@@ -397,31 +438,34 @@ export const getPriorityCategory = (priorityScore: number): 'high' | 'medium' | 
   return 'low';
 };
 
-// Save feedback about emotion/sentiment prediction
+// Save feedback about emotion/sentiment prediction with persistence
 export const saveFeedback = (
   customerId: string, 
   originalPrediction: AdvancedSentimentResult,
   correctedEmotion?: Emotion,
   correctedSentiment?: 'positive' | 'negative' | 'neutral'
 ): void => {
-  // In a real system, we would send this to a backend API
-  // For now, we'll store it in localStorage to simulate feedback collection
-  
   try {
-    const feedbackKey = 'emotion_feedback_data';
-    const existingFeedback = JSON.parse(localStorage.getItem(feedbackKey) || '[]');
+    const existingFeedback = JSON.parse(localStorage.getItem(MODEL_FEEDBACK_KEY) || '[]');
     
-    existingFeedback.push({
+    const feedbackEntry = {
       timestamp: new Date().toISOString(),
       customerId,
       originalPrediction,
       correctedEmotion,
       correctedSentiment,
       wasCorrect: !correctedEmotion && !correctedSentiment
-    });
+    };
     
-    localStorage.setItem(feedbackKey, JSON.stringify(existingFeedback));
-    console.log('Feedback saved:', existingFeedback[existingFeedback.length - 1]);
+    existingFeedback.push(feedbackEntry);
+    localStorage.setItem(MODEL_FEEDBACK_KEY, JSON.stringify(existingFeedback));
+    
+    // Dispatch event to notify other components of feedback update
+    window.dispatchEvent(new CustomEvent('sentiment-feedback-updated', { 
+      detail: feedbackEntry 
+    }));
+    
+    console.log('Feedback saved:', feedbackEntry);
     
   } catch (error) {
     console.error('Error saving feedback:', error);
