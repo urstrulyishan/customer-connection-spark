@@ -6,8 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import CustomersPage from "./pages/CustomersPage";
-import LeadsPage from "./pages/LeadsPage";
 import MessagesPage from "./pages/MessagesPage";
 import ChatbotPage from "./pages/ChatbotPage";
 import CompanyRegistration from "./pages/CompanyRegistration";
@@ -20,7 +18,6 @@ import IshanTechDemo from "./pages/IshanTechDemo";
 import SentimentAnalysisPage from "./pages/SentimentAnalysisPage";
 
 const App = () => {
-  // Create a new QueryClient instance inside the component
   const [queryClient] = useState(() => new QueryClient());
 
   return (
@@ -38,8 +35,6 @@ const App = () => {
               
               {/* Protected routes */}
               <Route path="/" element={<Index />} />
-              <Route path="/customers" element={<CustomersPage />} />
-              <Route path="/leads" element={<LeadsPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/chatbot" element={<ChatbotPage />} />
               <Route path="/company-profile" element={<CompanyProfile />} />

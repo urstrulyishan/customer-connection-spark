@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, Clock, MessageSquare, Menu, X, Bot, Building, LogOut, ShoppingCart, LineChart } from "lucide-react";
+import { BarChart3, Bot, Building, LogOut, ShoppingCart, LineChart, Menu, X } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -14,24 +13,9 @@ const navItems = [
     icon: BarChart3,
   },
   {
-    name: "Customers",
-    path: "/customers",
-    icon: Users,
-  },
-  {
-    name: "Leads",
-    path: "/leads",
-    icon: Users,
-  },
-  {
-    name: "Interactions",
-    path: "/interactions",
-    icon: Clock,
-  },
-  {
     name: "Messages",
     path: "/messages",
-    icon: MessageSquare,
+    icon: ShoppingCart,
   },
   {
     name: "Chatbot",
@@ -60,9 +44,8 @@ export function Navbar() {
   
   // Check if user is logged in
   useEffect(() => {
-    const protectedRoutes = ['/', '/customers', '/leads', '/interactions', '/messages', '/chatbot', '/company-profile', '/sentiment-analysis'];
+    const protectedRoutes = ['/', '/messages', '/chatbot', '/company-profile', '/sentiment-analysis'];
     
-    // If on a protected route and not logged in, redirect to login
     if (protectedRoutes.includes(location.pathname) && !currentCompany && !localStorage.getItem("currentCompany")) {
       navigate("/company-login");
     }
@@ -76,12 +59,14 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed left-0 top-0 w-full bg-white/90 backdrop-blur-md z-40 border-b border-border shadow-subtle">
+    <nav className="fixed left-0 top-0 w-full bg-white/90 backdrop-blur-xl z-40 border-b border-border shadow-lg">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-semibold tracking-tight">CRM</span>
+              <div className="bg-gradient-to-r from-primary/80 to-primary p-2 rounded-lg">
+                <span className="text-xl font-semibold tracking-tight text-white">CRM</span>
+              </div>
               <span className="text-xs py-0.5 px-1.5 bg-primary/10 text-primary rounded-md">Beta</span>
             </Link>
             
@@ -97,9 +82,9 @@ export function Navbar() {
                   key={item.name}
                   to={item.path}
                   className={cn(
-                    "group flex items-center space-x-1 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                    "group flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
                     location.pathname === item.path
-                      ? "text-primary bg-primary/5"
+                      ? "text-white bg-primary shadow-md"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
                   )}
                 >
@@ -110,42 +95,35 @@ export function Navbar() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             {currentCompany && (
               <>
-                <Link to="/company-profile" className="hidden sm:flex items-center space-x-1 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                <Link 
+                  to="/company-profile" 
+                  className="hidden sm:flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+                >
                   <Building className="h-4 w-4" />
                   <span>Company Profile</span>
                 </Link>
                 
                 <Button 
                   variant="ghost" 
-                  size="icon" 
+                  size="sm" 
                   onClick={handleLogout}
-                  className="hidden sm:flex"
+                  className="hidden sm:flex items-center space-x-2"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span className="sr-only">Logout</span>
+                  <span>Logout</span>
                 </Button>
               </>
             )}
             
-            <Link to={currentCompany ? "/company-profile" : "/company-login"} className="rounded-full w-8 h-8 bg-accent flex items-center justify-center" aria-label="User menu">
-              <span className="text-xs font-medium">{initials}</span>
-            </Link>
-            
-            <button
-              type="button"
-              className="sm:hidden ml-1 inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            <Link 
+              to={currentCompany ? "/company-profile" : "/company-login"} 
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-primary/80 to-primary text-white transition-transform hover:scale-105"
             >
-              <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
-                <X className="block h-5 w-5" aria-hidden="true" />
-              ) : (
-                <Menu className="block h-5 w-5" aria-hidden="true" />
-              )}
-            </button>
+              <span className="text-sm font-medium">{initials}</span>
+            </Link>
           </div>
         </div>
       </div>

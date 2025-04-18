@@ -133,7 +133,7 @@ export function RecentPurchases() {
                     <p className="text-sm text-muted-foreground">{purchase.email}</p>
                   </div>
                 </div>
-                <Badge variant="outline">₹{purchase.total.toLocaleString()}</Badge>
+                <Badge variant="outline" className="font-medium">₹{purchase.total.toLocaleString()}</Badge>
               </div>
               
               <div className="text-sm space-y-1">
@@ -154,22 +154,37 @@ export function RecentPurchases() {
                   <p className="italic text-muted-foreground">{purchase.feedback}</p>
                   
                   {purchase.sentiment && (
-                    <div className="mt-1 flex">
+                    <div className="mt-1 flex items-center gap-2">
                       <span 
                         className={`text-xs px-2 py-0.5 rounded-full ${getSentimentColor(purchase.sentiment.sentiment)}`}
                       >
-                        Sentiment: {purchase.sentiment.sentiment.charAt(0).toUpperCase() + purchase.sentiment.sentiment.slice(1)}
+                        {purchase.sentiment.sentiment.charAt(0).toUpperCase() + purchase.sentiment.sentiment.slice(1)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {(purchase.sentiment.confidence * 100).toFixed(0)}% confidence
                       </span>
                     </div>
                   )}
                 </div>
               )}
               
-              <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                <div className="flex items-center">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  <time dateTime={purchase.date}>
-                    {new Date(purchase.date).toLocaleString()}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-3 pt-2 border-t">
+                <div className="flex items-center text-xs text-muted-foreground space-x-2">
+                  <Calendar className="h-3 w-3" />
+                  <time dateTime={purchase.date} className="font-medium">
+                    {new Date(purchase.date).toLocaleDateString(undefined, {
+                      weekday: 'short',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </time>
+                  <span>•</span>
+                  <time dateTime={purchase.date} className="font-medium">
+                    {new Date(purchase.date).toLocaleTimeString(undefined, {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </time>
                 </div>
                 
