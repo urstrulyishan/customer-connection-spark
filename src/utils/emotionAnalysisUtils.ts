@@ -69,11 +69,147 @@ export const detectLanguage = async (text: string): Promise<string> => {
   }
 };
 
+// Rule-based fallback for sentiment analysis when models fail to load
+export const analyzeSentimentRuleBased = (text: string): AdvancedSentimentResult => {
+  const positiveWords = ['good', 'great', 'excellent', 'happy', 'joy', 'love', 'like', 'amazing', 'wonderful', 'thank', 'thanks', 'helpful', 'awesome', 'contento', 'gracias', 'bueno', 'excelente', 'feliz', 'contenta'];
+  const negativeWords = ['bad', 'poor', 'terrible', 'hate', 'dislike', 'awful', 'horrible', 'disappointed', 'frustrat', 'anger', 'angry', 'annoyed', 'annoy', 'worst', 'problema', 'malo', 'terrible', 'odio', 'frustrado'];
+  const fearWords = ['afraid', 'scared', 'fear', 'worry', 'anxious', 'nervous', 'terrified', 'miedo', 'preocupado'];
+  const trustWords = ['trust', 'reliable', 'depend', 'honest', 'faith', 'confiar', 'confianza'];
+  const surpriseWords = ['surprise', 'surprised', 'wow', 'unexpected', 'amazing', 'sorprendido', 'sorpresa'];
+  const disgustWords = ['disgust', 'gross', 'ew', 'yuck', 'nasty', 'repulsive', 'asco', 'repugnante'];
+  const sadWords = ['sad', 'unhappy', 'depressed', 'sorrow', 'miserable', 'triste', 'deprimido'];
+  const frustratedWords = ['frustrat', 'annoying', 'irritat', 'annoy', 'bother', 'frustrado', 'irritado'];
+  
+  const lowerText = text.toLowerCase();
+  
+  // Count matches
+  let positiveCount = 0;
+  let negativeCount = 0;
+  let emotionScores: Record<Emotion, number> = {
+    'joy': 0,
+    'anger': 0,
+    'sadness': 0,
+    'fear': 0,
+    'surprise': 0,
+    'disgust': 0,
+    'trust': 0,
+    'frustration': 0,
+    'neutral': 0.1 // Default small value for neutral
+  };
+  
+  // Check for positive words
+  for (const word of positiveWords) {
+    if (lowerText.includes(word)) {
+      positiveCount++;
+      emotionScores.joy += 0.3;
+      emotionScores.trust += 0.1;
+    }
+  }
+  
+  // Check for negative words
+  for (const word of negativeWords) {
+    if (lowerText.includes(word)) {
+      negativeCount++;
+      emotionScores.anger += 0.2;
+    }
+  }
+  
+  // Check for specific emotions
+  for (const word of fearWords) {
+    if (lowerText.includes(word)) {
+      emotionScores.fear += 0.3;
+      negativeCount++;
+    }
+  }
+  
+  for (const word of trustWords) {
+    if (lowerText.includes(word)) {
+      emotionScores.trust += 0.3;
+      positiveCount++;
+    }
+  }
+  
+  for (const word of surpriseWords) {
+    if (lowerText.includes(word)) {
+      emotionScores.surprise += 0.3;
+      // Surprise can be positive or negative
+    }
+  }
+  
+  for (const word of disgustWords) {
+    if (lowerText.includes(word)) {
+      emotionScores.disgust += 0.3;
+      negativeCount++;
+    }
+  }
+  
+  for (const word of sadWords) {
+    if (lowerText.includes(word)) {
+      emotionScores.sadness += 0.3;
+      negativeCount++;
+    }
+  }
+  
+  for (const word of frustratedWords) {
+    if (lowerText.includes(word)) {
+      emotionScores.frustration += 0.3;
+      negativeCount++;
+    }
+  }
+  
+  // Determine sentiment
+  let sentiment: 'positive' | 'negative' | 'neutral';
+  let sentimentScore: number;
+  
+  if (positiveCount > negativeCount) {
+    sentiment = 'positive';
+    sentimentScore = 0.5 + (Math.min(positiveCount, 5) / 10);
+  } else if (negativeCount > positiveCount) {
+    sentiment = 'negative';
+    sentimentScore = 0.5 - (Math.min(negativeCount, 5) / 10);
+  } else {
+    sentiment = 'neutral';
+    sentimentScore = 0.5;
+  }
+  
+  // Find the dominant emotion
+  const emotions = Object.entries(emotionScores)
+    .map(([emotion, score]) => ({
+      emotion: emotion as Emotion,
+      score,
+      confidence: score
+    }))
+    .sort((a, b) => b.score - a.score);
+  
+  // If no strong emotions were detected, increase the neutral score
+  if (emotions[0].score < 0.2) {
+    emotions.find(e => e.emotion === 'neutral')!.score = 0.3;
+    emotions.find(e => e.emotion === 'neutral')!.confidence = 0.3;
+    
+    // Re-sort
+    emotions.sort((a, b) => b.score - a.score);
+  }
+  
+  return {
+    sentiment,
+    sentimentScore,
+    emotions,
+    dominantEmotion: emotions[0].emotion,
+    language: detectLanguage(text),
+    confidenceScore: Math.max(...Object.values(emotionScores))
+  };
+};
+
 // Initialize the emotion detection model (lazily loaded)
 let emotionClassifier: any = null;
 let sentimentClassifier: any = null;
+let modelLoadFailed = false;
 
 const initializeModels = async () => {
+  if (modelLoadFailed) {
+    return false; // Don't keep trying if models failed to load
+  }
+  
   try {
     // Load sentiment analysis model
     if (!sentimentClassifier) {
@@ -96,6 +232,7 @@ const initializeModels = async () => {
     return true;
   } catch (error) {
     console.error('Error initializing models:', error);
+    modelLoadFailed = true; // Mark as failed so we don't keep trying
     return false;
   }
 };
@@ -117,13 +254,16 @@ export const analyzeEmotions = async (text: string): Promise<AdvancedSentimentRe
   }
   
   try {
-    // Detect language
+    // Detect language first (this is fast and rule-based)
     const language = await detectLanguage(text);
     
     // Initialize models
     const modelsInitialized = await initializeModels();
+    
+    // If models failed to initialize, use rule-based approach
     if (!modelsInitialized) {
-      return { ...defaultResult, language };
+      console.log('Using rule-based sentiment analysis as fallback');
+      return analyzeSentimentRuleBased(text);
     }
     
     // For non-English text, we could:
@@ -180,7 +320,34 @@ export const analyzeEmotions = async (text: string): Promise<AdvancedSentimentRe
     };
   } catch (error) {
     console.error('Error analyzing emotions:', error);
-    return { ...defaultResult, language: 'en' };
+    return analyzeSentimentRuleBased(text); // Use fallback on error
+  }
+};
+
+// Simplified version for IshanTech demo
+export const analyzeSentiment = (text: string): { sentiment: string, score: number } => {
+  // This is a synchronous version for the demo page
+  const lowerText = text.toLowerCase();
+  const positiveWords = ['good', 'great', 'excellent', 'happy', 'joy', 'love', 'like', 'amazing', 'wonderful', 'thank'];
+  const negativeWords = ['bad', 'poor', 'terrible', 'hate', 'dislike', 'awful', 'horrible', 'disappointed', 'frustrated'];
+  
+  let positiveCount = 0;
+  let negativeCount = 0;
+  
+  for (const word of positiveWords) {
+    if (lowerText.includes(word)) positiveCount++;
+  }
+  
+  for (const word of negativeWords) {
+    if (lowerText.includes(word)) negativeCount++;
+  }
+  
+  if (positiveCount > negativeCount) {
+    return { sentiment: 'positive', score: 0.5 + (Math.min(positiveCount, 5) / 10) };
+  } else if (negativeCount > positiveCount) {
+    return { sentiment: 'negative', score: 0.5 - (Math.min(negativeCount, 5) / 10) };
+  } else {
+    return { sentiment: 'neutral', score: 0.5 };
   }
 };
 

@@ -10,7 +10,7 @@ import { ShoppingCart, Check, ArrowRight, BarChart3, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "@/contexts/CompanyContext";
 import { toast } from "sonner";
-import { analyzeSentiment } from "@/utils/sentimentAnalysisUtils";
+import { analyzeEmotions, analyzeSentiment } from "@/utils/emotionAnalysisUtils";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Product {
@@ -99,7 +99,46 @@ export default function IshanTechDemo() {
     setCurrentStep('checkout');
   };
 
-  const completeOrder = () => {
+  const saveCustomerMessage = async (customerId: string, message: string) => {
+    try {
+      const companyId = currentCompany?.id || JSON.parse(localStorage.getItem("currentCompany") || "{}").id;
+      
+      // Get existing messages
+      const messagesKey = `customer_messages_${companyId}`;
+      const existingMessages = JSON.parse(localStorage.getItem(messagesKey) || "[]");
+      
+      // Create new message
+      const newMessage = {
+        customerId: customerId,
+        message: message,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Add to start of array for newest first
+      const updatedMessages = [newMessage, ...existingMessages];
+      
+      // Save back to localStorage
+      localStorage.setItem(messagesKey, JSON.stringify(updatedMessages));
+      
+      // Dispatch storage event to notify other tabs
+      window.dispatchEvent(new CustomEvent('customer-message-added', {
+        detail: { message: newMessage }
+      }));
+      
+      console.log("Customer message saved", newMessage);
+      return true;
+    } catch (error) {
+      console.error("Error saving customer message:", error);
+      return false;
+    }
+  };
+
+  const completeOrder = async () => {
+    // First, save the feedback as a customer message for sentiment analysis
+    if (feedback.trim()) {
+      await saveCustomerMessage(defaultUser.id, feedback);
+    }
+    
     // Analyze feedback sentiment
     const sentimentResult = analyzeSentiment(feedback);
     
@@ -172,6 +211,10 @@ export default function IshanTechDemo() {
       description: "Your purchase data has been integrated with the CRM",
     });
     setTimeout(() => navigate('/'), 1000);
+  };
+
+  const viewSentimentAnalysis = () => {
+    navigate('/sentiment-analysis');
   };
 
   return (
@@ -464,10 +507,21 @@ export default function IshanTechDemo() {
                 has been sent to our CRM system. You can view this data in your CRM dashboard.
               </p>
               <div className="space-y-2">
-                <Button onClick={viewDashboard} className="w-full sm:w-auto">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  View in CRM Dashboard
-                </Button>
+                <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 justify-center">
+                  <Button onClick={viewDashboard} className="w-full sm:w-auto">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    View in CRM Dashboard
+                  </Button>
+                  
+                  <Button 
+                    variant="secondary" 
+                    onClick={viewSentimentAnalysis} 
+                    className="w-full sm:w-auto"
+                  >
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    View Sentiment Analysis
+                  </Button>
+                </div>
                 <div className="h-2"></div>
                 <Button variant="outline" onClick={() => setCurrentStep('browse')} className="w-full sm:w-auto">
                   Continue Shopping

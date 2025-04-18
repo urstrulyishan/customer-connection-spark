@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { PageContainer, SectionContainer } from "@/components/ui/container";
 import { MainLayout } from "@/layouts/main-layout";
 import { 
@@ -28,6 +28,8 @@ import { EmotionDistribution } from "@/components/sentiment/emotion-distribution
 import { SentimentTrends } from "@/components/sentiment/sentiment-trends";
 import { CustomerPriorityList } from "@/components/sentiment/customer-priority-list";
 import { LanguageDistribution } from "@/components/sentiment/language-distribution";
+import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
 
 // Sample multilingual customer messages for testing
 const sampleCustomerMessages = [
@@ -70,11 +72,29 @@ export default function SentimentAnalysisPage() {
   const [customerAnalysis, setCustomerAnalysis] = useState<CustomerAnalysisData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("summary");
+  const [refreshKey, setRefreshKey] = useState(0); // Used to force refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Function to handle message events
+  const handleCustomerMessageAdded = useCallback((event: Event) => {
+    const customEvent = event as CustomEvent;
+    console.log("New customer message detected:", customEvent.detail);
+    // Force a refresh of the data
+    setRefreshKey(prev => prev + 1);
+  }, []);
+
+  // Handle storage events for customers from other tabs
+  const handleStorageChange = useCallback(() => {
+    console.log("Storage change detected, refreshing data");
+    // Force a refresh of the data
+    setRefreshKey(prev => prev + 1);
+  }, []);
   
   // Load data and perform analysis
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
+      setIsRefreshing(true);
       
       try {
         // Get company ID
@@ -91,25 +111,47 @@ export default function SentimentAnalysisPage() {
         setLeads(leadsData);
         
         // Get stored messages or use sample data
-        const storedMessages = localStorage.getItem(`customer_messages_${companyId}`);
-        const messages = storedMessages ? JSON.parse(storedMessages) : sampleCustomerMessages;
+        const messagesKey = `customer_messages_${companyId}`;
+        const storedMessages = localStorage.getItem(messagesKey);
+        let messages = [];
         
-        // Save sample messages if none exist
-        if (!storedMessages) {
-          localStorage.setItem(`customer_messages_${companyId}`, JSON.stringify(sampleCustomerMessages));
+        if (storedMessages) {
+          messages = JSON.parse(storedMessages);
+          console.log(`Loaded ${messages.length} customer messages`);
+        } else {
+          // If no messages exist, use sample data
+          messages = sampleCustomerMessages;
+          localStorage.setItem(messagesKey, JSON.stringify(sampleCustomerMessages));
+          console.log("Using sample messages");
         }
         
         // Process customer messages with emotion analysis
         const analysisPromises = messages.map(async (msg: any) => {
-          // Find customer
-          const customer = customersData.find((c: CustomerData) => c.id === msg.customerId);
+          // For demo users from IshanTech demo
+          let customer;
+          
+          if (msg.customerId.startsWith('demo-user')) {
+            // Create a virtual customer for demo users
+            customer = {
+              id: msg.customerId,
+              name: "Demo User",
+              initials: "DU",
+              email: "demo@example.com"
+            };
+          } else {
+            // Find existing customer
+            customer = customersData.find((c: CustomerData) => c.id === msg.customerId);
+          }
+          
           if (!customer) return null;
           
           // Count interactions for this customer
           const customerInteractions = messages.filter((m: any) => m.customerId === msg.customerId).length;
           
           // Analyze emotions in message
+          console.log(`Analyzing message: "${msg.message}"`);
           const analysis = await analyzeEmotions(msg.message);
+          console.log(`Analysis result:`, analysis);
           
           // Calculate priority
           const priorityScore = calculatePriority(
@@ -121,7 +163,7 @@ export default function SentimentAnalysisPage() {
           return {
             customerId: customer.id,
             customerName: customer.name,
-            customerInitials: customer.initials,
+            customerInitials: customer.initials || customer.name.charAt(0),
             sentiment: analysis.sentiment,
             sentimentScore: analysis.sentimentScore,
             dominantEmotion: analysis.dominantEmotion,
@@ -143,15 +185,38 @@ export default function SentimentAnalysisPage() {
         const sortedResults = validResults.sort((a, b) => b.priorityScore - a.priorityScore);
         
         setCustomerAnalysis(sortedResults);
+        
+        // Show success message when refreshing
+        if (isRefreshing) {
+          toast.success("Sentiment data refreshed successfully");
+        }
       } catch (error) {
         console.error("Error loading data:", error);
+        toast.error("Error refreshing sentiment data");
       } finally {
         setIsLoading(false);
+        setIsRefreshing(false);
       }
     };
     
     loadData();
-  }, [currentCompany]);
+    
+    // Add event listeners for real-time updates
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('customer-message-added', handleCustomerMessageAdded);
+    
+    return () => {
+      // Clean up event listeners
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('customer-message-added', handleCustomerMessageAdded);
+    };
+  }, [currentCompany, refreshKey, handleStorageChange, handleCustomerMessageAdded, isRefreshing]);
+  
+  // Handle manual refresh
+  const handleManualRefresh = () => {
+    setIsRefreshing(true);
+    setRefreshKey(prev => prev + 1);
+  };
   
   // Handle feedback submission
   const handleFeedback = (
@@ -186,14 +251,28 @@ export default function SentimentAnalysisPage() {
           : c
       )
     );
+    
+    toast.success("Feedback submitted. This will help improve future analysis.");
   };
   
   return (
     <MainLayout>
       <PageContainer>
         <div className="flex flex-col space-y-2 mb-6">
-          <h1 className="text-2xl font-bold text-center mb-4">Advanced Sentiment Analysis</h1>
-          <p className="text-muted-foreground text-center">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Advanced Sentiment Analysis</h1>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleManualRefresh} 
+              disabled={isRefreshing}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+            </Button>
+          </div>
+          <p className="text-muted-foreground">
             Analyze customer emotions, sentiment, and priority across languages.
           </p>
         </div>
