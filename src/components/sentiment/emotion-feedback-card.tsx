@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +19,22 @@ export function EmotionFeedbackCard({ customer, onFeedback }: EmotionFeedbackCar
   const [showFeedback, setShowFeedback] = useState(false);
   const [correctedEmotion, setCorrectedEmotion] = useState<Emotion | undefined>(undefined);
   const [correctedSentiment, setCorrectedSentiment] = useState<'positive' | 'negative' | 'neutral' | undefined>(undefined);
+  
+  // Reset feedback state when component unmounts or page refreshes
+  useEffect(() => {
+    // This will ensure that feedback UI state is reset on refresh
+    const handleBeforeUnload = () => {
+      setShowFeedback(false);
+      setCorrectedEmotion(undefined);
+      setCorrectedSentiment(undefined);
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
   
   const getEmotionColor = (emotion: Emotion): string => {
     const colorMap: Record<Emotion, string> = {
@@ -67,6 +82,7 @@ export function EmotionFeedbackCard({ customer, onFeedback }: EmotionFeedbackCar
   
   const handleSubmitFeedback = () => {
     onFeedback(customer, correctedEmotion, correctedSentiment as any);
+    // Reset UI state after submission
     setShowFeedback(false);
     setCorrectedEmotion(undefined);
     setCorrectedSentiment(undefined);

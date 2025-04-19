@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from "react";
 import { PageContainer, SectionContainer } from "@/components/ui/container";
 import { MainLayout } from "@/layouts/main-layout";
@@ -218,13 +217,13 @@ export default function SentimentAnalysisPage() {
     setRefreshKey(prev => prev + 1);
   };
   
-  // Handle feedback submission
+  // Handle feedback submission with original message text
   const handleFeedback = (
     customer: CustomerAnalysisData,
     correctedEmotion?: Emotion,
     correctedSentiment?: 'positive' | 'negative' | 'neutral'
   ) => {
-    // Save feedback
+    // Save feedback with original message text
     saveFeedback(
       customer.customerId,
       {
@@ -233,16 +232,18 @@ export default function SentimentAnalysisPage() {
         emotions: customer.emotions,
         dominantEmotion: customer.dominantEmotion,
         language: customer.language,
-        confidenceScore: Math.max(...customer.emotions.map(e => e.confidence)) 
+        confidenceScore: Math.max(...customer.emotions.map(e => e.confidence)),
+        originalText: customer.lastMessage // Include original text for model training
       },
       correctedEmotion,
-      correctedSentiment
+      correctedSentiment,
+      customer.lastMessage
     );
     
     // Update UI with correction
     setCustomerAnalysis(prev => 
       prev.map(c => 
-        c.customerId === customer.customerId
+        c.customerId === customer.customerId && c.timestamp === customer.timestamp
           ? {
               ...c,
               dominantEmotion: correctedEmotion || c.dominantEmotion,

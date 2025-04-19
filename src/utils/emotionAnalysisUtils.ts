@@ -61,10 +61,57 @@ const getCachedResponses = (): Array<{text: string, analysis: AdvancedSentimentR
 const saveResponseToCache = (text: string, analysis: AdvancedSentimentResult) => {
   try {
     const cachedResponses = getCachedResponses();
-    cachedResponses.push({ text, analysis });
+    // Check if this text already exists in cache
+    const existingIndex = cachedResponses.findIndex(item => item.text === text);
+    
+    if (existingIndex >= 0) {
+      // Update existing entry
+      cachedResponses[existingIndex] = { text, analysis };
+    } else {
+      // Add new entry
+      cachedResponses.push({ text, analysis });
+    }
+    
     localStorage.setItem(CACHED_RESPONSES_KEY, JSON.stringify(cachedResponses));
   } catch (error) {
     console.error('Error saving to cache:', error);
+  }
+};
+
+// Function to update cached response based on feedback
+const updateCachedResponseWithFeedback = (text: string, correctedEmotion?: Emotion, correctedSentiment?: 'positive' | 'negative' | 'neutral') => {
+  if (!text) return;
+  
+  try {
+    const cachedResponses = getCachedResponses();
+    const existingResponseIndex = cachedResponses.findIndex(item => item.text === text);
+    
+    if (existingResponseIndex >= 0) {
+      const updatedAnalysis = { ...cachedResponses[existingResponseIndex].analysis };
+      
+      // Update with corrections
+      if (correctedEmotion) {
+        updatedAnalysis.dominantEmotion = correctedEmotion;
+      }
+      
+      if (correctedSentiment) {
+        updatedAnalysis.sentiment = correctedSentiment;
+      }
+      
+      // Update confidence score to reflect human feedback (high confidence)
+      updatedAnalysis.confidenceScore = 0.95;
+      
+      // Save the updated analysis back to cache
+      cachedResponses[existingResponseIndex] = {
+        text,
+        analysis: updatedAnalysis
+      };
+      
+      localStorage.setItem(CACHED_RESPONSES_KEY, JSON.stringify(cachedResponses));
+      console.log('Updated cached response with feedback:', updatedAnalysis);
+    }
+  } catch (error) {
+    console.error('Error updating cached response with feedback:', error);
   }
 };
 
@@ -295,6 +342,19 @@ const checkFeedbackBasedPrediction = (text: string): AdvancedSentimentResult | n
         confidenceScore: 0.95 // High confidence for feedback-based predictions
       };
     }
+    
+    // Also check cached responses updated by feedback
+    const cachedResponses = getCachedResponses();
+    const cachedFeedback = cachedResponses.find(item => 
+      item.text.toLowerCase() === text.toLowerCase() && 
+      item.analysis.confidenceScore === 0.95 // This indicates it was manually corrected
+    );
+    
+    if (cachedFeedback) {
+      console.log('Found cached feedback prediction');
+      return cachedFeedback.analysis;
+    }
+    
     return null;
   } catch (error) {
     console.error('Error checking feedback-based prediction:', error);
@@ -486,7 +546,7 @@ export const getPriorityCategory = (priorityScore: number): 'high' | 'medium' | 
   return 'low';
 };
 
-// Update saveFeedback to include original text
+// Update saveFeedback to include original text and update cache
 export const saveFeedback = (
   customerId: string, 
   originalPrediction: AdvancedSentimentResult,
@@ -503,12 +563,17 @@ export const saveFeedback = (
       originalPrediction,
       correctedEmotion,
       correctedSentiment,
-      originalText,
+      originalText: originalText || originalPrediction.originalText,
       wasCorrect: !correctedEmotion && !correctedSentiment
     };
     
     existingFeedback.push(feedbackEntry);
     localStorage.setItem(MODEL_FEEDBACK_KEY, JSON.stringify(existingFeedback));
+    
+    // Also update cached responses for immediate training effect
+    if (originalText && (correctedEmotion || correctedSentiment)) {
+      updateCachedResponseWithFeedback(originalText, correctedEmotion, correctedSentiment);
+    }
     
     // Dispatch event to notify other components of feedback update
     window.dispatchEvent(new CustomEvent('sentiment-feedback-updated', { 
