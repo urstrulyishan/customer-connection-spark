@@ -233,7 +233,7 @@ export default function SentimentAnalysisPage() {
         dominantEmotion: customer.dominantEmotion,
         language: customer.language,
         confidenceScore: Math.max(...customer.emotions.map(e => e.confidence)),
-        originalText: customer.lastMessage // Include original text for model training
+        originalText: customer.lastMessage // Now this property exists in the type
       },
       correctedEmotion,
       correctedSentiment,

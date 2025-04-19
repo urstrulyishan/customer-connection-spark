@@ -14,6 +14,7 @@ export type AdvancedSentimentResult = {
   dominantEmotion: Emotion;
   language: string;
   confidenceScore: number;
+  originalText?: string; // Adding the optional originalText property
 };
 
 export interface CustomerAnalysisData {

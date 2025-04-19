@@ -20,6 +20,7 @@ export type AdvancedSentimentResult = {
   dominantEmotion: Emotion;
   language: string;
   confidenceScore: number;
+  originalText?: string;
 };
 
 // Map emotion labels from model to our standardized emotions
@@ -100,6 +101,9 @@ const updateCachedResponseWithFeedback = (text: string, correctedEmotion?: Emoti
       
       // Update confidence score to reflect human feedback (high confidence)
       updatedAnalysis.confidenceScore = 0.95;
+      
+      // Save the original text for future reference
+      updatedAnalysis.originalText = text;
       
       // Save the updated analysis back to cache
       cachedResponses[existingResponseIndex] = {
@@ -339,7 +343,8 @@ const checkFeedbackBasedPrediction = (text: string): AdvancedSentimentResult | n
         emotions: matchingFeedback.originalPrediction.emotions,
         dominantEmotion: matchingFeedback.correctedEmotion || matchingFeedback.originalPrediction.dominantEmotion,
         language: matchingFeedback.originalPrediction.language,
-        confidenceScore: 0.95 // High confidence for feedback-based predictions
+        confidenceScore: 0.95, // High confidence for feedback-based predictions
+        originalText: matchingFeedback.originalText
       };
     }
     
@@ -557,10 +562,16 @@ export const saveFeedback = (
   try {
     const existingFeedback = JSON.parse(localStorage.getItem(MODEL_FEEDBACK_KEY) || '[]');
     
+    // Create a copy of the original prediction and add the original text
+    const predictionWithText = {
+      ...originalPrediction,
+      originalText: originalText || originalPrediction.originalText
+    };
+    
     const feedbackEntry = {
       timestamp: new Date().toISOString(),
       customerId,
-      originalPrediction,
+      originalPrediction: predictionWithText,
       correctedEmotion,
       correctedSentiment,
       originalText: originalText || originalPrediction.originalText,
