@@ -1,3 +1,4 @@
+
 import { pipeline, env } from "@huggingface/transformers";
 
 // Configure transformers.js to use WebGPU when available and enable browser cache
@@ -315,11 +316,51 @@ const initializeModels = async () => {
 // Function to get all feedback including IshanTech demo feedback
 export const getAllFeedback = () => {
   try {
+    // Get IshanTech feedback
+    let ishanTechFeedback = [];
+    try {
+      ishanTechFeedback = JSON.parse(localStorage.getItem(ISHAN_TECH_FEEDBACK_KEY) || '[]');
+      
+      // Convert IshanTech feedback to compatible format if needed
+      ishanTechFeedback = ishanTechFeedback.map((feedback: any) => {
+        // Ensure it has the right structure
+        if (!feedback.originalPrediction) {
+          // Create a compatible structure
+          return {
+            customerId: feedback.userId || 'demo-user',
+            timestamp: feedback.timestamp || new Date().toISOString(),
+            originalPrediction: {
+              sentiment: feedback.actualSentiment || 'neutral',
+              dominantEmotion: feedback.actualEmotion || 'neutral',
+              sentimentScore: 0.5,
+              emotions: [],
+              language: 'en',
+              confidenceScore: 0.9,
+              originalText: feedback.text || ''
+            },
+            correctedEmotion: feedback.userSelectedEmotion,
+            correctedSentiment: feedback.userSelectedSentiment,
+            originalText: feedback.text || '',
+            wasCorrect: feedback.wasCorrect === true,
+            notes: feedback.notes || 'From IshanTech Demo'
+          };
+        }
+        return feedback;
+      });
+    } catch (error) {
+      console.error('Error parsing IshanTech feedback:', error);
+      ishanTechFeedback = [];
+    }
+    
+    // Get sentiment feedback
     const sentimentFeedback = JSON.parse(localStorage.getItem(MODEL_FEEDBACK_KEY) || '[]');
-    const ishanTechFeedback = JSON.parse(localStorage.getItem(ISHAN_TECH_FEEDBACK_KEY) || '[]');
-    return [...sentimentFeedback, ...ishanTechFeedback].sort((a, b) => 
+    
+    // Combine and sort by timestamp (newest first)
+    const allFeedback = [...sentimentFeedback, ...ishanTechFeedback].sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
+    
+    return allFeedback;
   } catch (error) {
     console.error('Error loading feedback:', error);
     return [];
@@ -330,6 +371,7 @@ export const getAllFeedback = () => {
 const checkFeedbackBasedPrediction = (text: string): AdvancedSentimentResult | null => {
   try {
     const allFeedback = getAllFeedback();
+    // Find if we have exact text match feedback
     const matchingFeedback = allFeedback.find(f => 
       f.originalText && f.originalText.toLowerCase() === text.toLowerCase() && 
       (f.correctedEmotion || f.correctedSentiment)
@@ -595,5 +637,51 @@ export const saveFeedback = (
     
   } catch (error) {
     console.error('Error saving feedback:', error);
+  }
+};
+
+// Function to get all previous comments/texts that have been analyzed
+export const getAllAnalyzedTexts = (): Array<{text: string, timestamp: string, sentiment: string, emotion: string}> => {
+  try {
+    // Get all feedback entries
+    const allFeedback = getAllFeedback();
+    
+    // Get all cached responses
+    const cachedResponses = getCachedResponses();
+    
+    // Combine and deduplicate
+    const allTexts = new Map();
+    
+    // Add from feedback
+    allFeedback.forEach(feedback => {
+      if (feedback.originalText) {
+        allTexts.set(feedback.originalText, {
+          text: feedback.originalText,
+          timestamp: feedback.timestamp,
+          sentiment: feedback.correctedSentiment || feedback.originalPrediction.sentiment,
+          emotion: feedback.correctedEmotion || feedback.originalPrediction.dominantEmotion
+        });
+      }
+    });
+    
+    // Add from cached responses
+    cachedResponses.forEach(item => {
+      if (!allTexts.has(item.text)) {
+        allTexts.set(item.text, {
+          text: item.text,
+          timestamp: new Date().toISOString(), // We don't have timestamp for cached items
+          sentiment: item.analysis.sentiment,
+          emotion: item.analysis.dominantEmotion
+        });
+      }
+    });
+    
+    // Convert to array and sort by timestamp
+    return Array.from(allTexts.values()).sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  } catch (error) {
+    console.error('Error getting all analyzed texts:', error);
+    return [];
   }
 };

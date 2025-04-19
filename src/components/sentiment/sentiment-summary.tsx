@@ -4,8 +4,12 @@ import { CustomerAnalysisData, Emotion } from "@/types/emotion";
 import { EmotionFeedbackCard } from "./emotion-feedback-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
-import { getAllFeedback } from '@/utils/emotionAnalysisUtils';
+import { getAllFeedback, getAllAnalyzedTexts } from '@/utils/emotionAnalysisUtils';
 import { format } from 'date-fns';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface SentimentSummaryProps {
   customerAnalysis: CustomerAnalysisData[];
@@ -18,6 +22,8 @@ interface SentimentSummaryProps {
 }
 
 export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: SentimentSummaryProps) {
+  const [showAllCommentsDialog, setShowAllCommentsDialog] = useState(false);
+  
   const sentimentCounts = {
     positive: customerAnalysis.filter(c => c.sentiment === 'positive').length,
     neutral: customerAnalysis.filter(c => c.sentiment === 'neutral').length,
@@ -82,12 +88,24 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
           </div>
           
           <div className="space-y-2">
-            <h4 className="text-sm font-medium">Recent Feedback</h4>
+            <div className="flex justify-between items-center">
+              <h4 className="text-sm font-medium">Recent Feedback</h4>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowAllCommentsDialog(true)}
+              >
+                View All
+              </Button>
+            </div>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {allFeedback.slice(0, 5).map((feedback: any, index: number) => (
                 <div key={index} className="text-sm p-2 bg-muted rounded-md">
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="space-y-1">
+                      {feedback.originalText && (
+                        <p className="text-xs italic text-muted-foreground">"{feedback.originalText.substring(0, 50)}{feedback.originalText.length > 50 ? '...' : ''}"</p>
+                      )}
                       {feedback.correctedEmotion && (
                         <p>
                           <span className="font-medium">Corrected emotion:</span>{' '}
@@ -98,6 +116,11 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
                         <p>
                           <span className="font-medium">Corrected sentiment:</span>{' '}
                           {feedback.correctedSentiment}
+                        </p>
+                      )}
+                      {feedback.notes && (
+                        <p className="text-xs text-muted-foreground">
+                          {feedback.notes}
                         </p>
                       )}
                     </div>
@@ -123,6 +146,62 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
       );
     }
   };
+  
+  // All Comments Dialog
+  const renderAllCommentsDialog = () => {
+    const allTexts = getAllAnalyzedTexts();
+    
+    return (
+      <Dialog open={showAllCommentsDialog} onOpenChange={setShowAllCommentsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>All Analyzed Comments</DialogTitle>
+            <DialogDescription>
+              Showing all previously analyzed comments and their sentiment analysis results
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="h-[500px] mt-4">
+            <div className="space-y-3 pr-4">
+              {allTexts.map((item, index) => (
+                <Card key={index} className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center space-x-2">
+                        <Badge className={
+                          item.sentiment === 'positive' ? 'bg-green-100 text-green-800' : 
+                          item.sentiment === 'negative' ? 'bg-red-100 text-red-800' : 
+                          'bg-gray-100 text-gray-800'
+                        }>
+                          {item.sentiment}
+                        </Badge>
+                        <Badge className="bg-blue-100 text-blue-800">
+                          {item.emotion}
+                        </Badge>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(item.timestamp), 'MMM d, yyyy HH:mm')}
+                      </span>
+                    </div>
+                    <p className="text-sm">
+                      {item.text}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+              
+              {allTexts.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No analyzed comments available.
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+  
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -241,7 +320,8 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
             <CardDescription>AI-generated insights from sentiment data</CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {
+              isLoading ? (
               <div className="space-y-2">
                 <Skeleton className="w-full h-4 rounded-md" />
                 <Skeleton className="w-full h-4 rounded-md" />
@@ -351,6 +431,9 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
           </CardContent>
         </Card>
       </div>
+      
+      {/* Dialog to show all previous comments */}
+      {renderAllCommentsDialog()}
     </div>
   );
 }
