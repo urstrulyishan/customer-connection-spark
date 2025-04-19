@@ -1,10 +1,11 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomerAnalysisData, Emotion } from "@/types/emotion";
 import { EmotionFeedbackCard } from "./emotion-feedback-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { getAllFeedback } from '@/utils/emotionAnalysisUtils';
+import { format } from 'date-fns';
 
 interface SentimentSummaryProps {
   customerAnalysis: CustomerAnalysisData[];
@@ -40,6 +41,88 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
     { name: 'Medium', value: priorityCounts.medium, color: '#f59e0b' },
     { name: 'Low', value: priorityCounts.low, color: '#10b981' },
   ];
+  
+  const renderFeedbackStatus = () => {
+    if (isLoading) {
+      return (
+        <div className="space-y-2">
+          <Skeleton className="w-full h-4 rounded-md" />
+          <Skeleton className="w-full h-4 rounded-md" />
+          <Skeleton className="w-3/4 h-4 rounded-md" />
+        </div>
+      );
+    }
+
+    try {
+      const allFeedback = getAllFeedback();
+      const totalFeedback = allFeedback.length;
+      const correctPredictions = allFeedback.filter((f: any) => f.wasCorrect).length;
+      const accuracy = totalFeedback > 0 ? (correctPredictions / totalFeedback * 100).toFixed(1) : 'N/A';
+      
+      if (totalFeedback === 0) {
+        return (
+          <p className="text-sm text-muted-foreground">
+            No feedback has been provided yet. Help improve the model by providing feedback on the predictions.
+          </p>
+        );
+      }
+      
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-sm">
+              <span className="font-medium">Total feedback entries:</span> {totalFeedback}
+            </p>
+            <p className="text-sm">
+              <span className="font-medium">Correct predictions:</span> {correctPredictions}
+            </p>
+            <p className="text-sm">
+              <span className="font-medium">Current accuracy:</span> {accuracy}%
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Recent Feedback</h4>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {allFeedback.slice(0, 5).map((feedback: any, index: number) => (
+                <div key={index} className="text-sm p-2 bg-muted rounded-md">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      {feedback.correctedEmotion && (
+                        <p>
+                          <span className="font-medium">Corrected emotion:</span>{' '}
+                          {feedback.correctedEmotion}
+                        </p>
+                      )}
+                      {feedback.correctedSentiment && (
+                        <p>
+                          <span className="font-medium">Corrected sentiment:</span>{' '}
+                          {feedback.correctedSentiment}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(feedback.timestamp), 'MMM d, yyyy HH:mm')}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground mt-2">
+            The model learns from your feedback to improve prediction accuracy over time.
+          </p>
+        </div>
+      );
+    } catch (error) {
+      return (
+        <p className="text-sm text-muted-foreground">
+          Error loading feedback data. Please try again.
+        </p>
+      );
+    }
+  };
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -185,7 +268,6 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
                   </p>
                 </div>
                 
-                {/* Most common emotion */}
                 {(() => {
                   const emotions = customerAnalysis.map(c => c.dominantEmotion);
                   const emotionCounts: Record<string, number> = {};
@@ -208,7 +290,6 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
                   return null;
                 })()}
                 
-                {/* Language breakdown */}
                 {(() => {
                   const languages = customerAnalysis.map(c => c.language);
                   const uniqueLanguages = [...new Set(languages)];
@@ -266,55 +347,7 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
             <CardDescription>Model improvement through human feedback</CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="w-full h-4 rounded-md" />
-                <Skeleton className="w-full h-4 rounded-md" />
-                <Skeleton className="w-3/4 h-4 rounded-md" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {(() => {
-                  try {
-                    const feedbackData = JSON.parse(localStorage.getItem('emotion_feedback_data') || '[]');
-                    const totalFeedback = feedbackData.length;
-                    const correctPredictions = feedbackData.filter((f: any) => f.wasCorrect).length;
-                    const accuracy = totalFeedback > 0 ? (correctPredictions / totalFeedback * 100).toFixed(1) : 'N/A';
-                    
-                    if (totalFeedback === 0) {
-                      return (
-                        <p className="text-sm text-muted-foreground">
-                          No feedback has been provided yet. Help improve the model by providing feedback on the predictions.
-                        </p>
-                      );
-                    }
-                    
-                    return (
-                      <>
-                        <p className="text-sm">
-                          <span className="font-medium">Total feedback entries:</span> {totalFeedback}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Correct predictions:</span> {correctPredictions}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Current accuracy:</span> {accuracy}%
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          The model learns from your feedback to improve prediction accuracy over time.
-                        </p>
-                      </>
-                    );
-                  } catch (error) {
-                    return (
-                      <p className="text-sm text-muted-foreground">
-                        Error loading feedback data. Please try again.
-                      </p>
-                    );
-                  }
-                })()}
-              </div>
-            )}
+            {renderFeedbackStatus()}
           </CardContent>
         </Card>
       </div>

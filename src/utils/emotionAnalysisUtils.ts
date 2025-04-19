@@ -46,6 +46,7 @@ const emotionMapping: Record<string, Emotion> = {
 // Constants for localStorage keys
 const CACHED_RESPONSES_KEY = 'sentiment_responses_cache';
 const MODEL_FEEDBACK_KEY = 'emotion_feedback_data';
+const ISHAN_TECH_FEEDBACK_KEY = 'ishan_tech_feedback';
 
 // Function to get cached responses
 const getCachedResponses = (): Array<{text: string, analysis: AdvancedSentimentResult}> => {
@@ -260,8 +261,55 @@ const initializeModels = async () => {
   }
 };
 
+// Function to get all feedback including IshanTech demo feedback
+export const getAllFeedback = () => {
+  try {
+    const sentimentFeedback = JSON.parse(localStorage.getItem(MODEL_FEEDBACK_KEY) || '[]');
+    const ishanTechFeedback = JSON.parse(localStorage.getItem(ISHAN_TECH_FEEDBACK_KEY) || '[]');
+    return [...sentimentFeedback, ...ishanTechFeedback].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  } catch (error) {
+    console.error('Error loading feedback:', error);
+    return [];
+  }
+};
+
+// Function to check for existing feedback-based predictions
+const checkFeedbackBasedPrediction = (text: string): AdvancedSentimentResult | null => {
+  try {
+    const allFeedback = getAllFeedback();
+    const matchingFeedback = allFeedback.find(f => 
+      f.originalText && f.originalText.toLowerCase() === text.toLowerCase() && 
+      (f.correctedEmotion || f.correctedSentiment)
+    );
+
+    if (matchingFeedback) {
+      console.log('Found matching feedback-based prediction');
+      return {
+        sentiment: matchingFeedback.correctedSentiment || matchingFeedback.originalPrediction.sentiment,
+        sentimentScore: matchingFeedback.originalPrediction.sentimentScore,
+        emotions: matchingFeedback.originalPrediction.emotions,
+        dominantEmotion: matchingFeedback.correctedEmotion || matchingFeedback.originalPrediction.dominantEmotion,
+        language: matchingFeedback.originalPrediction.language,
+        confidenceScore: 0.95 // High confidence for feedback-based predictions
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error checking feedback-based prediction:', error);
+    return null;
+  }
+};
+
 // Main function to analyze text for emotions and sentiment
 export const analyzeEmotions = async (text: string): Promise<AdvancedSentimentResult> => {
+  // First check if we have a feedback-based prediction
+  const feedbackPrediction = checkFeedbackBasedPrediction(text);
+  if (feedbackPrediction) {
+    return feedbackPrediction;
+  }
+
   // Check cache first
   const cachedResponses = getCachedResponses();
   const cachedResult = cachedResponses.find(item => item.text === text);
@@ -438,12 +486,13 @@ export const getPriorityCategory = (priorityScore: number): 'high' | 'medium' | 
   return 'low';
 };
 
-// Save feedback about emotion/sentiment prediction with persistence
+// Update saveFeedback to include original text
 export const saveFeedback = (
   customerId: string, 
   originalPrediction: AdvancedSentimentResult,
   correctedEmotion?: Emotion,
-  correctedSentiment?: 'positive' | 'negative' | 'neutral'
+  correctedSentiment?: 'positive' | 'negative' | 'neutral',
+  originalText?: string
 ): void => {
   try {
     const existingFeedback = JSON.parse(localStorage.getItem(MODEL_FEEDBACK_KEY) || '[]');
@@ -454,6 +503,7 @@ export const saveFeedback = (
       originalPrediction,
       correctedEmotion,
       correctedSentiment,
+      originalText,
       wasCorrect: !correctedEmotion && !correctedSentiment
     };
     
