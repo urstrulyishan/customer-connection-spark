@@ -23,6 +23,7 @@ interface SentimentSummaryProps {
 
 export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: SentimentSummaryProps) {
   const [showAllCommentsDialog, setShowAllCommentsDialog] = useState(false);
+  const [showAllFeedbackDialog, setShowAllFeedbackDialog] = useState(false);
   
   const sentimentCounts = {
     positive: customerAnalysis.filter(c => c.sentiment === 'positive').length,
@@ -48,6 +49,40 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
     { name: 'Low', value: priorityCounts.low, color: '#10b981' },
   ];
   
+  // Add new dialog for all feedback
+  const renderAllFeedbackDialog = () => {
+    return (
+      <Dialog open={showAllFeedbackDialog} onOpenChange={setShowAllFeedbackDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>All Customer Feedback</DialogTitle>
+            <DialogDescription>
+              Showing all customer feedback with sentiment analysis results
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="h-[500px] mt-4">
+            <div className="space-y-4">
+              {customerAnalysis.map(customer => (
+                <EmotionFeedbackCard
+                  key={`${customer.customerId}-${customer.timestamp}`}
+                  customer={customer}
+                  onFeedback={onFeedback}
+                />
+              ))}
+              
+              {customerAnalysis.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No customer feedback available.
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   const renderFeedbackStatus = () => {
     if (isLoading) {
       return (
@@ -284,8 +319,19 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
         
         <Card>
           <CardHeader>
-            <CardTitle>Recent Customer Feedback</CardTitle>
-            <CardDescription>Most recent customer interactions with sentiment analysis</CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Recent Customer Feedback</CardTitle>
+                <CardDescription>Most recent customer interactions with sentiment analysis</CardDescription>
+              </div>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAllFeedbackDialog(true)}
+              >
+                View All
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -434,6 +480,7 @@ export function SentimentSummary({ customerAnalysis, isLoading, onFeedback }: Se
       
       {/* Dialog to show all previous comments */}
       {renderAllCommentsDialog()}
+      {renderAllFeedbackDialog()}
     </div>
   );
 }
